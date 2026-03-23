@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Song Generator Studio</title>
+<style>
+:root{--bg:#0e1328;--panel:#151c38;--panel2:#1d2650;--text:#f7f8ff;--muted:#aab4d6;--line:rgba(255,255,255,.12);--a:#8b5cf6;--b:#ec4899;--c:#22c55e;--r:20px;--shadow:0 20px 50px rgba(0,0,0,.25)}
+body.light{--bg:#f4f7ff;--panel:#ffffff;--panel2:#eef2ff;--text:#111827;--muted:#5b6788;--line:rgba(17,24,39,.09);--shadow:0 20px 45px rgba(15,23,42,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,rgba(139,92,246,.24),transparent 30%),linear-gradient(180deg,var(--bg),#0a0f20);color:var(--text)}
+.container{width:min(1220px,calc(100% - 28px));margin:0 auto}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.top{position:sticky;top:0;z-index:30;background:rgba(10,14,30,.7);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+body.light .top{background:rgba(244,247,255,.85)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.between{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:12px 16px;border-radius:14px;cursor:pointer}
+.btn:hover{transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,var(--a),var(--b));border-color:transparent}.btn.green{background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(34,197,94,.08))}
+.wrap{padding:18px 0}.hero{padding:26px 0}.heroGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.pad{padding:22px}
+h1{font-size:clamp(2rem,4vw,4rem);line-height:1.03;margin:12px 0}h2{margin:0 0 6px}.muted{color:var(--muted);line-height:1.6}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.howtoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.howStep{padding:18px}.howStep strong{display:block;font-size:1.1rem;margin-bottom:6px}.howStep .num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:999px;background:linear-gradient(135deg,var(--a),var(--b));margin-bottom:10px;font-weight:700}
+.input,.select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:14px}
+textarea{min-height:110px;resize:vertical}.field{display:grid;gap:7px;align-content:start}.label{font-weight:700}.small{font-size:.92rem;color:var(--muted)}
+.section{padding:16px}.section details{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.03)}.section summary{padding:16px 18px;cursor:pointer;font-weight:800}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 18px 18px}.toolbar{padding:0 18px 18px}
+.multi{border:1px solid var(--line);border-radius:16px;padding:10px;background:var(--panel2)}.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;min-height:30px}.tag{padding:6px 10px;border-radius:999px;background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.4)}
+.progress{height:12px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b),var(--c))}
+.tab.active,.activeCard{outline:2px solid rgba(139,92,246,.6)}.output{white-space:pre-wrap;line-height:1.65;min-height:260px;padding:18px;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:18px}
+.notice{position:fixed;right:16px;bottom:16px;background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:14px;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}
+.notice.show{opacity:1;transform:translateY(0)}
+@media(max-width:1050px){.grid5{grid-template-columns:repeat(3,1fr)}.grid3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:860px){.heroGrid,.grid5,.grid3,.grid2,.formgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="container between" style="padding:14px 0">
+    <div><strong>🎵 Song Generator Studio</strong><div class="small">single-file generator • presets • multi-select • Suno-ready export</div></div>
+    <div class="row">
+      <button class="btn" id="themeBtn">🌗 Theme</button>
+      <button class="btn green" id="randomHeader">🎲 Randomize All</button>
+      <button class="btn" id="viewOut">View Output</button>
+      <button class="btn primary" id="homeTop">Return Home</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero" id="topPage">
+    <div class="heroGrid">
+      <div class="card pad">
+        <div class="small">✨ Pretty, responsive, beginner-friendly, and not half-assed.</div>
+        <h1>Build original song ideas, lyric directions, and AI music prompts.</h1>
+        <div class="muted">Use presets, inspiration cards, multi-select fields, randomizers, export/import JSON, and a real Suno-ready output flow. Copy and download work. Return-home buttons work. The form is built section by section so you can go from vague idea to actual lyrics instead of accidental instrumentals.</div>
+        <div class="row" style="margin-top:18px">
+          <button class="btn primary" id="quickStart">Quick Start</button>
+          <button class="btn" id="customBuilder">Custom Builder</button>
+          <button class="btn green" id="randomTop">Randomize All</button>
+        </div>
+      </div>
+      <div class="card pad">
+        <div class="grid2">
+          <div class="card pad"><strong>15</strong><div class="small">preset cards</div></div>
+          <div class="card pad"><strong>55</strong><div class="small">lyric ideas</div></div>
+          <div class="card pad"><strong>10</strong><div class="small">starter songs</div></div>
+          <div class="card pad"><strong>4</strong><div class="small">Suno copy boxes</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="howToUseSection">
+    <div class="card pad">
+      <div class="between" style="margin-bottom:14px">
+        <div>
+          <h2>How to Use</h2>
+          <div class="small">Quick steps so you can build lyrics for Suno without guessing what goes where.</div>
+        </div>
+        <button class="btn" type="button" id="jumpToBuilder">Go To Builder</button>
+      </div>
+      <div class="howtoGrid">
+        <div class="card howStep">
+          <div class="num">1</div>
+          <strong>Pick your path</strong>
+          <div class="small">Use a preset, hit Randomize All, build it section by section, or type your own lyrics in the last section.</div>
+        </div>
+        <div class="card howStep">
+          <div class="num">2</div>
+          <strong>Choose your mode</strong>
+          <div class="small">Lyrics gives writing prompts, Concept gives song ideas, and Suno gives title + style + full lyrics.</div>
+        </div>
+        <div class="card howStep">
+          <div class="num">3</div>
+          <strong>Generate output</strong>
+          <div class="small">Click Generate Output, then use the tabs in the Output Panel to copy exactly what you need.</div>
+        </div>
+        <div class="card howStep">
+          <div class="num">4</div>
+          <strong>Paste into Suno</strong>
+          <div class="small">In Suno Advanced mode, paste Full Lyrics into Lyrics and Style Prompt into Styles. Keep Instrumental off.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="between"><div><h2>Output Mode</h2><div class="small">Pick the target result first.</div></div></div>
+    <div class="grid3" id="modeGrid"></div>
+  </section>
+
+  <section class="wrap">
+    <div class="between"><div><h2>Preset Cards</h2><div class="small">Load a preset, then tweak whatever you want.</div></div><button class="btn" id="savePreset">Save Current as Preset</button></div>
+    <div class="card pad" style="margin:14px 0 16px">
+      <div class="between" style="gap:16px;align-items:end">
+        <div style="flex:1;min-width:240px">
+          <div class="label">Preset Genre Override</div>
+          <select class="select" id="presetGenreOverride">
+            <option value="">Use preset's genre</option>
+            <option value="Afrobeats">Afrobeats</option>
+            <option value="Alternative">Alternative</option>
+            <option value="Blues">Blues</option>
+            <option value="Boom Bap">Boom Bap</option>
+            <option value="Classical Crossover">Classical Crossover</option>
+            <option value="Country">Country</option>
+            <option value="Dance">Dance</option>
+            <option value="Dancehall">Dancehall</option>
+            <option value="Disco">Disco</option>
+            <option value="Drill">Drill</option>
+            <option value="EDM">EDM</option>
+            <option value="Folk">Folk</option>
+            <option value="Funk">Funk</option>
+            <option value="Gospel">Gospel</option>
+            <option value="Grunge">Grunge</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="House">House</option>
+            <option value="Indie Pop">Indie Pop</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Latin Pop">Latin Pop</option>
+            <option value="Lo-Fi">Lo-Fi</option>
+            <option value="Neo-Soul">Neo-Soul</option>
+            <option value="Pop">Pop</option>
+            <option value="R&amp;B">R&amp;B</option>
+            <option value="Reggaeton">Reggaeton</option>
+            <option value="Rock">Rock</option>
+            <option value="Soul">Soul</option>
+            <option value="Trap">Trap</option>
+            <option value="Trip-Hop">Trip-Hop</option>
+            <option value="Worship">Worship</option>
+          </select>
+          <div class="small">Pick a genre before clicking a preset if you want the preset vibe with a different sound.</div>
+        </div>
+        <label class="row" style="align-items:center"><input type="checkbox" id="presetFillAll" checked> <span class="small">Auto-fill every blank section after preset loads</span></label>
+      </div>
+    </div>
+    <div class="grid5" id="presetGrid"></div>
+  </section>
+
+  <section class="wrap">
+    <div class="between"><div><h2>Inspiration</h2><div class="small">Starter songs and lyric prompts.</div></div><input class="input" id="searchPrompt" placeholder="Search lyric prompts..." style="max-width:320px"></div>
+    <div class="grid2" id="starterGrid" style="margin-top:14px"></div>
+    <div class="grid3" id="promptGrid" style="margin-top:14px"></div>
+  </section>
+
+  <section class="wrap">
+    <div class="between"><div><h2>Main Generator Form</h2><div class="small">Accordion builder with progress and section tools.</div></div><div class="row"><button class="btn" id="expandAll">Expand All</button><button class="btn" id="collapseAll">Collapse All</button></div></div>
+    <div class="card pad" style="margin:14px 0">
+      <div class="between"><strong>Progress</strong><span class="small"><span id="pctText">0%</span> complete</span></div>
+      <div class="progress" style="margin-top:10px"><div class="bar" id="bar"></div></div>
+    </div>
+    <form id="form"></form>
+    <div class="row" style="margin-top:14px">
+      <button type="button" class="btn primary" id="generate">Generate Output</button>
+      <button type="button" class="btn" id="randomAll">Randomize All</button>
+      <button type="button" class="btn" id="clearAll">Clear All</button>
+      <button type="button" class="btn" id="copyAdvanced">Copy Advanced Prompt</button>
+      <button type="button" class="btn" id="exportJson">Export JSON</button>
+      <label class="btn" for="importJson">Import JSON</label><input hidden type="file" id="importJson" accept=".json">
+      <button type="button" class="btn green" id="toOutput">Go To Output</button>
+      <button type="button" class="btn" id="homeBottom">Return Home</button>
+    </div>
+  </section>
+
+  <section class="wrap" id="outputSection">
+    <div class="between"><div><h2>Output Panel</h2><div class="small">Lyrics, concepts, and Suno-ready copy boxes.</div></div></div>
+    <div class="card pad">
+      <div class="row" id="tabs"></div>
+      <div class="row" style="margin:14px 0"><button class="btn" id="copyOut">Copy Output</button><button class="btn" id="downloadTxt">Download TXT</button><button class="btn" id="clearOut">Clear Output</button></div>
+      <div id="panels"></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="card pad"><strong>Tips</strong><div class="small" style="margin-top:8px">Don’t cram every option in at once. Pick a strong theme, a mood, a hook angle, and one clear audience use case. Then add story conflict, production, and visuals.</div></div>
+  </section>
+</main>
+
+<div class="notice" id="notice"></div>
+
+<script>
+const APP = {"sections": [{"id": "songIdentity", "title": "1. Song Identity", "fields": [{"key": "songTitle", "label": "Song Title", "type": "text", "placeholder": "Example: Midnight Confession", "required": true}, {"key": "alternateTitle", "label": "Alternate Title", "type": "text", "placeholder": "Optional alternate title"}, {"key": "genre", "label": "Genre", "type": "select", "options": ["None", "Afrobeats", "Alternative", "Blues", "Boom Bap", "Classical Crossover", "Country", "Dance", "Dancehall", "Disco", "Drill", "EDM", "Folk", "Funk", "Gospel", "Grunge", "Hip-Hop", "House", "Indie Pop", "Jazz", "Latin Pop", "Lo-Fi", "Neo-Soul", "Pop", "R&B", "Reggaeton", "Rock", "Soul", "Trap", "Trip-Hop", "Worship"]}, {"key": "subgenre", "label": "Subgenre", "type": "select", "options": ["None", "Acoustic Pop", "Alternative R&B", "Bedroom Pop", "Bluegrass", "Chillhop", "Christian Contemporary", "Country Pop", "Dark Pop", "Deep House", "Dream Pop", "Electro Pop", "Emo Rap", "Future Bass", "G-Funk", "Garage Rock", "Indie Folk", "Jazz Rap", "K-Pop", "Lo-Fi Soul", "Modern Worship", "Neo-Soul Ballad", "Pop Punk", "Rage Rap", "Southern Soul", "Synthwave", "Trap Soul", "Urban Gospel", "West Coast Rap", "Y2K Pop", "Yacht Rock"]}, {"key": "genreFusion", "label": "Genre Fusion", "type": "multiselect", "options": ["None", "Afrobeats", "Alternative", "Ambient", "Anthemic", "Artful", "Blues", "Bold", "Country", "Dance", "Drill", "EDM", "Folk", "Funk", "Gospel", "Hip-Hop", "House", "Jazz", "Latin", "Lo-Fi", "Neo-Soul", "Pop", "R&B", "Reggae", "Reggaeton", "Rock", "Soul", "Trap", "Trip-Hop", "World", "Worship"]}, {"key": "language", "label": "Language", "type": "select", "options": ["None", "Ambient", "Anthemic", "Arabic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "English", "French", "German", "Haitian Creole", "Hindi", "Italian", "Japanese", "Korean", "Mandarin", "Nigerian Pidgin", "Portuguese", "Spanish", "Swahili", "Tagalog", "Tamil", "Turkish", "Urdu", "Vietnamese", "Yoruba"]}, {"key": "secondaryLanguage", "label": "Secondary Language", "type": "select", "options": ["None", "Ambient", "Anthemic", "Arabic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "English", "French", "German", "Haitian Creole", "Hindi", "Italian", "Japanese", "Korean", "Mandarin", "Nigerian Pidgin", "Portuguese", "Spanish", "Swahili", "Tagalog", "Tamil", "Turkish", "Urdu", "Vietnamese", "Yoruba"]}, {"key": "cleanExplicit", "label": "Clean or Explicit", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Clean", "Clean With Attitude", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Explicit", "Fiery", "Fresh", "Gentle", "Radio Edit", "Raw But Minimal Profanity", "Soft Clean", "Street Clean"]}, {"key": "groupType", "label": "Solo / Duet / Group / Choir", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Choir", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Duet", "Dynamic", "Earthy", "Elegant", "Emotional", "Ensemble", "Epic", "Experimental", "Featured Artist", "Group", "Lead With Choir", "Lead With Feature", "Lead With Spoken Intro", "Solo", "Trio"]}, {"key": "marketStyle", "label": "Commercial / Indie / Underground / Cinematic Style", "type": "select", "options": ["None", "Ad-Friendly", "Alternative Indie", "Ambient", "Anthemic", "Art House", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Festival Ready", "Indie", "Luxury Editorial", "Mainstream", "Mixtape Style", "Pop Crossover", "Radio Friendly", "Streaming First", "Sync Ready", "Underground"]}]}, {"id": "themeMessage", "title": "2. Theme & Message", "fields": [{"key": "mainTheme", "label": "Main Theme", "type": "multiselect", "options": ["None", "Abundance", "Betrayal", "Breakthrough", "Confidence", "Faith", "Family", "Forgiveness", "Freedom", "Friendship", "Glow Up", "Grief", "Healing", "Heartbreak", "Hope", "Identity", "Joy", "Justice", "Legacy", "Love", "Lust", "Motivation", "New Beginnings", "Peace", "Prayer", "Revenge", "Romance", "Self-Love", "Survival", "Transformation", "Victory"]}, {"key": "subtheme", "label": "Subtheme", "type": "multiselect", "options": ["None", "Adventure", "Closure", "Desire", "Discipline", "Dream Chasing", "Elevation", "Escape", "Feminine Power", "Grace", "Gratitude", "Hustle", "Inner Child", "Longing", "Luxury", "Mercy", "Missing Home", "Obedience", "Redemption", "Reflection", "Release", "Resilience", "Restoration", "Sacrifice", "Seduction", "Self-Respect", "Sisterhood", "Temptation", "Trust", "Vulnerability", "Worth"]}, {"key": "coreMessage", "label": "Core Message", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Choose yourself", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "God still restores", "Growth hurts but heals", "I am enough", "I won't fold", "Keep the faith", "Love should feel safe", "No going back", "Pain made me stronger", "Peace over chaos", "Pressure made a diamond", "Softness is strength", "Speak life", "The comeback is real", "We rise again"]}, {"key": "lessonTakeaway", "label": "Lesson or Takeaway", "type": "select", "options": ["None", "Acceptance brings peace", "Ambient", "Anthemic", "Artful", "Bold", "Boundaries protect your heart", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Every loss teaches", "Faith outlasts fear", "Healing is not linear", "Honesty changes everything", "Love requires courage", "Patience has purpose", "Purpose survives pain", "Rest is productive", "Self-respect attracts better", "Time reveals truth", "Trust God in transition", "What breaks you can build you", "You can begin again"]}, {"key": "storyTopic", "label": "Story Topic", "type": "select", "options": ["None", "After the breakup", "Against all odds", "Ambient", "Anthemic", "Artful", "Backroad confession", "Big city dream", "Bold", "Bright", "Church testimony", "Cinematic", "Classic", "Cloudy", "Coming home", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dream date", "Dreamy", "Dynamic", "Family roots", "Glow-up season", "Hard season", "Late-night temptation", "Long-distance love", "Moments after betrayal", "Overnight success", "Second chance"]}, {"key": "emotionalGoal", "label": "Emotional Goal", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Bring comfort", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Create catharsis", "Create desire", "Create empowerment", "Create nostalgia", "Create release", "Dark", "Delicate", "Dreamy", "Dynamic", "Encourage healing", "Inspire dancing", "Inspire hope", "Make listeners cry", "Make listeners feel seen", "Motivate action", "Spark confidence", "Spark worship", "Start singalong"]}, {"key": "purposeSong", "label": "Purpose of the Song", "type": "select", "options": ["None", "Ad campaign", "Album centerpiece", "Ambient", "Anthem for healing", "Anthemic", "Artful", "Bold", "Breakout single", "Bright", "Church set", "Cinematic", "Classic", "Cloudy", "Club record", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Fan favorite", "Intro track", "Love dedication", "Motivational soundtrack", "Personal journal", "Radio single", "Social media snippet", "Sync placement", "Wedding dance"]}]}, {"id": "moodEmotion", "title": "3. Mood & Emotion", "fields": [{"key": "overallMood", "label": "Overall Mood", "type": "multiselect", "options": ["None", "Airy", "Angry", "Bittersweet", "Bold", "Calm", "Celebratory", "Dark", "Dreamy", "Empowering", "Flirty", "Gentle", "Hopeful", "Luxurious", "Melancholic", "Moody", "Mystical", "Nostalgic", "Playful", "Prayerful", "Reflective", "Romantic", "Sensual", "Serious", "Soft", "Soulful", "Spiritual", "Triumphant", "Uplifting", "Warm", "Yearning"]}, {"key": "primaryEmotion", "label": "Primary Emotion", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Awe", "Bold", "Confidence", "Desire", "Determination", "Faith", "Fear", "Freedom", "Gratitude", "Grief", "Happiness", "Heartache", "Hope", "Jealousy", "Joy", "Loneliness", "Love", "Passion", "Peace", "Pride", "Regret", "Relief", "Sadness", "Shame", "Strength", "Trust", "Wonder"]}, {"key": "secondaryEmotion", "label": "Secondary Emotion", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Awe", "Bold", "Bright", "Calm", "Cinematic", "Closure", "Curiosity", "Defiance", "Devotion", "Excitement", "Forgiveness", "Grace", "Hunger", "Longing", "Mercy", "Nerves", "Nostalgia", "Optimism", "Possession", "Reflection", "Sass", "Security", "Sorrow", "Tenderness", "Thrill", "Urgency", "Vulnerability"]}, {"key": "emotionalIntensity", "label": "Emotional Intensity", "type": "range", "min": 1, "max": 10, "step": 1, "default": 6}, {"key": "energyLevel", "label": "Energy Level", "type": "range", "min": 1, "max": 10, "step": 1, "default": 6}, {"key": "atmosphere", "label": "Atmosphere", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Arena", "Artful", "Bedroom", "Blue Hour", "Bold", "Bright", "Church Hall", "City Lights", "Cloudy Morning", "Desert Heat", "Dreamscape", "Firelit", "Foggy", "Golden Hour", "Intimate Lounge", "Midnight Drive", "Neon", "Ocean Breeze", "Rainy", "Road Trip", "Rooftop", "Sacred", "Smoky", "Studio", "Summer Night", "Sunrise", "Thunderstorm", "Velvet Night"]}, {"key": "lightDark", "label": "Light or Dark Tone", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Light", "Shadowy", "Sunlit", "Twilight"]}, {"key": "styleTone", "label": "Soft / Bold / Playful / Serious / Sexy / Spiritual / Reflective Style", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Playful", "Prayerful", "Reflective", "Serious", "Sexy", "Soft", "Spiritual", "Sultry", "Tender", "Triumphant", "Uplifting"]}]}, {"id": "lyricsStyle", "title": "4. Lyrics & Writing Style", "fields": [{"key": "lyricStyle", "label": "Lyric Style", "type": "multiselect", "options": ["None", "Ambient", "Anecdotal", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Conversational", "Dark", "Delicate", "Diary-Like", "Direct", "Dreamy", "Imagistic", "Minimal", "Narrative", "Poetic", "Prayerful", "Raw", "Romantic", "Spoken-Word Inspired", "Storybook", "Streetwise", "Symbolic", "Witty"]}, {"key": "poeticDirect", "label": "Poetic or Direct", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Blunt", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Direct", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Poetic", "Poetic With Punch", "Straight Talk"]}, {"key": "simplicityLevel", "label": "Simplicity Level", "type": "range", "min": 1, "max": 10, "step": 1, "default": 5}, {"key": "vocabularyLevel", "label": "Vocabulary Level", "type": "select", "options": ["None", "Accessible", "Advanced", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Everyday", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Literary", "Mixed", "Simple"]}, {"key": "slangLevel", "label": "Slang Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 3}, {"key": "metaphorLevel", "label": "Metaphor Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 4}, {"key": "symbolismLevel", "label": "Symbolism Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 4}, {"key": "wordplayLevel", "label": "Wordplay Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 5}, {"key": "repetitionLevel", "label": "Repetition Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 5}, {"key": "radioRaw", "label": "Radio-Friendly or Raw", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Clean Radio", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Radio-Friendly", "Raw", "Streaming Clean", "Street Raw"]}, {"key": "rhymeStyle", "label": "Rhyme Style", "type": "select", "options": ["None", "Alternating", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Couplets", "Dark", "Delicate", "Dense Internal", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Freeform", "Minimal", "Multi-Syllabic", "Open Form", "Perfect Rhymes", "Slant Rhymes", "Spacious"]}, {"key": "flowStyle", "label": "Flow Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bouncy", "Bright", "Chopped", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Floating", "Laid Back", "Melodic", "Rapid Fire", "Smooth", "Spoken", "Staccato", "Swinging"]}, {"key": "internalRhymes", "label": "Internal Rhymes", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dense", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Heavy", "Light", "Medium", "Minimal", "None"]}, {"key": "endRhymes", "label": "End Rhymes", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dense", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Heavy", "Light", "Medium", "Minimal", "None"]}, {"key": "multiRhymeLevel", "label": "Multisyllabic Rhyme Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 4}]}, {"id": "hookStructure", "title": "5. Hook & Structure", "fields": [{"key": "hookStyle", "label": "Hook Style", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Callout", "Catchphrase", "Chanted", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Earworm", "Emotional", "Gospel Lift", "Melodic", "Minimal", "Party Hook", "Prayerful", "Question Hook", "Repeatable", "Romantic", "Slogan-Like", "Spoken", "Whispered"]}, {"key": "chorusStyle", "label": "Chorus Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Arena Wide", "Artful", "Big Singalong", "Bold", "Bright", "Call and Response", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Gentle Lift", "Gospel Soar", "Intimate", "Looping", "Melodic Burst", "Minimal", "Prayerful", "Rap Chorus", "Soft Repeat"]}, {"key": "repeatedPhrase", "label": "Repeated Phrase", "type": "text", "placeholder": "Optional phrase to repeat in the chorus"}, {"key": "catchiness", "label": "Catchiness", "type": "range", "min": 1, "max": 10, "step": 1, "default": 7}, {"key": "singalongLevel", "label": "Singalong Level", "type": "range", "min": 1, "max": 10, "step": 1, "default": 6}, {"key": "callResponse", "label": "Call-and-Response", "type": "toggle", "default": false}, {"key": "viralOneLiner", "label": "Viral One-Liner", "type": "text", "placeholder": "Short punchy line for clips"}, {"key": "postChorusStyle", "label": "Post-Chorus Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Big Melody", "Bold", "Bright", "Callout", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Echoing", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Instrumental Tag", "None", "Soft Tag", "Vocal Chant"]}, {"key": "replayValue", "label": "Replay Value", "type": "range", "min": 1, "max": 10, "step": 1, "default": 7}, {"key": "intro", "label": "Intro", "type": "select", "options": ["None", "Ambient", "Ambient Intro", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Cold Open", "Commercial", "Confessional", "Contemporary", "Count-In", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Instrumental Intro", "Prayer Intro", "Spoken Intro", "Vocal Chop Intro"]}, {"key": "verseCount", "label": "Verse Count", "type": "select", "options": ["None", "1", "2", "3", "4", "5", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty"]}, {"key": "verseLength", "label": "Verse Length", "type": "select", "options": ["None", "12 Bars", "16 Bars", "24 Bars", "4 Bars", "8 Bars", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty"]}, {"key": "preChorus", "label": "Pre-Chorus", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Long Build", "None", "Short Lift", "Spoken Build", "Standard"]}, {"key": "chorus", "label": "Chorus", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Double Chorus", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Half Chorus", "Hook Only", "Standard Chorus", "Wide Finale Chorus"]}, {"key": "bridge", "label": "Bridge", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Emotional Bridge", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Instrumental Bridge", "None", "Prayer Bridge", "Rap Bridge", "Vocal Stack Bridge"]}, {"key": "bridgeType", "label": "Bridge Type", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Breakdown", "Bright", "Cinematic", "Classic", "Climactic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Key Change", "Quiet Drop", "Spoken", "Twist Reveal"]}, {"key": "breakdown", "label": "Breakdown", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Beatless", "Bold", "Bright", "Choir Breakdown", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Drum Breakdown", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Half-Time", "None", "Piano Only", "Strings Only"]}, {"key": "beatSwitch", "label": "Beat Switch", "type": "toggle", "default": false}, {"key": "beatDropMoment", "label": "Beat Drop Moment", "type": "select", "options": ["None", "After Intro", "After Pre-Chorus", "Ambient", "Anthemic", "Artful", "Before Final Chorus", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Mid Verse", "None", "Opening Hook", "Post Bridge"]}, {"key": "instrumentalSection", "label": "Instrumental Section", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Extended Outro", "Fiery", "Fresh", "Gentle", "Golden", "Guitar Solo", "None", "Piano Break", "Strings Break", "Synth Break"]}, {"key": "spokenInterlude", "label": "Spoken Interlude", "type": "select", "options": ["None", "Affirmation", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "None", "Phone Call", "Poem", "Prayer", "Short Monologue"]}, {"key": "adlibSection", "label": "Ad-lib Section", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Final Chorus Only", "Fresh", "Gentle", "Golden", "Gritty", "Hook and Outro", "None", "Scattered Throughout", "Verse Endings"]}, {"key": "outro", "label": "Outro", "type": "select", "options": ["None", "Abrupt End", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fade Out", "Fiery", "Fresh", "Gentle", "Golden", "Hook Repeat", "Prayer Close", "Soft Whisper", "Spoken Close"]}, {"key": "songLength", "label": "Song Length", "type": "select", "options": ["None", "1:30", "2:00", "2:30", "3:00", "3:30", "4:00", "4:30", "5:00", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh"]}]}, {"id": "vocalsDelivery", "title": "6. Vocals & Delivery", "fields": [{"key": "vocalType", "label": "Vocal Type", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Belting", "Bold", "Bright", "Choir-Led", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Conversational", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Melodic Rap", "Pure Singing", "Rap", "Soft Singing", "Spoken-Sung", "Whispery"]}, {"key": "vocalRange", "label": "Vocal Range", "type": "select", "options": ["None", "Alto", "Ambient", "Anthemic", "Artful", "Baritone", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Contralto", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Mezzo", "Soprano", "Tenor", "Wide Mixed Range"]}, {"key": "voiceFeel", "label": "Male / Female / Neutral / Mixed Feel", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Female", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Male", "Mixed", "Neutral", "Nonbinary Presentation"]}, {"key": "voiceAge", "label": "Youthful or Mature Voice", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Mature", "Seasoned", "Timeless", "Youthful"]}, {"key": "leadVocalStyle", "label": "Lead Vocal Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Breathy", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Controlled", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Gritty", "Open-Throat", "Smooth", "Soulful", "Urgent"]}, {"key": "backupVocals", "label": "Backup Vocals", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Callbacks", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Full Stacks", "Gentle", "Harmonies", "Minimal", "None", "Oohs and Aahs", "Response Lines"]}, {"key": "choirVocals", "label": "Choir Vocals", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Background Only", "Big Finale", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "None", "Subtle Pads", "Wide Worship Lift"]}, {"key": "harmonyLevel", "label": "Harmony Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 5}, {"key": "adlibStyle", "label": "Ad-lib Style", "type": "multiselect", "options": ["None", "Airy", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Callout", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Gospel Run", "Minimal", "Playful", "Prayerful", "Raspy", "Sultry", "Whispered"]}, {"key": "accentSound", "label": "Accent or Regional Sound", "type": "select", "options": ["None", "Ambient", "American South", "Anthemic", "Artful", "Atlanta", "Bold", "Bright", "British", "Caribbean", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Country Twang", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Global Neutral", "Jersey Club Flavor", "Lagos", "Memphis", "New York", "None", "Southern Soul", "Texas", "West Coast"]}, {"key": "vocalTone", "label": "Vocal Tone", "type": "select", "options": ["None", "Airy", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Honeyed", "Rich", "Silky", "Smoky", "Velvety", "Warm"]}, {"key": "deliveryStyle", "label": "Delivery Style", "type": "multiselect", "options": ["None", "Aggressive", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Confident", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Intimate", "Powerful", "Prayerful", "Seductive", "Soft", "Uplifting", "Urgent", "Vulnerable"]}, {"key": "deliveryBlend", "label": "Soft / Powerful / Aggressive / Seductive / Prayerful / Uplifting / Intimate Style", "type": "multiselect", "options": ["None", "Aggressive", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Intimate", "Powerful", "Prayerful", "Seductive", "Soft", "Uplifting", "Vulnerable"]}]}, {"id": "soundProduction", "title": "7. Sound & Production", "fields": [{"key": "mainInstruments", "label": "Main Instruments", "type": "multiselect", "options": ["None", "808 Bass", "Acoustic Guitar", "Ambient", "Anthemic", "Artful", "Bass Guitar", "Bold", "Bright", "Cello", "Choir Pads", "Cinematic", "Claps", "Classic", "Cloudy", "Commercial", "Confessional", "Electric Guitar", "Flute", "Grand Piano", "Hand Percussion", "Horn Section", "Organ", "Pads", "Percussion", "Rhodes", "Strings", "Synth Arp", "Synth Bass", "Synth Lead", "Violin"]}, {"key": "secondaryInstruments", "label": "Secondary Instruments", "type": "multiselect", "options": ["None", "Acoustic Guitar", "Ambient", "Anthemic", "Artful", "Bells", "Bold", "Brass", "Bright", "Choir Pads", "Cinematic", "Claps", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Cowbell", "Electric Guitar", "Finger Snaps", "Flute", "Grand Piano", "Harp", "Organ", "Percussion", "Rhodes", "Shaker", "Strings", "Synth Pad", "Tambourine", "Vocal Chops"]}, {"key": "acousticElectric", "label": "Acoustic or Electric", "type": "select", "options": ["None", "Acoustic", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Electric", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Mostly Acoustic", "Mostly Electric"]}, {"key": "liveDigital", "label": "Live Band or Digital", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Digital", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Hybrid", "Live Band", "Mostly Digital", "Mostly Live"]}, {"key": "synthChoices", "label": "Synth Choices", "type": "select", "options": ["None", "Ambient", "Analog Pad", "Anthemic", "Artful", "Bold", "Brassy Lead", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dream Pad", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "FM Keys", "Fiery", "Fresh", "Glassy Pluck", "None", "Retro Poly", "Warm Pad"]}, {"key": "pianoStyle", "label": "Piano Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Ballad Piano", "Bold", "Bright", "Bright Pop Piano", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Dark Felt Piano", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gospel Piano", "Grand Piano", "Honky-Tonk", "None", "Rhodes"]}, {"key": "guitarStyle", "label": "Guitar Style", "type": "select", "options": ["None", "Acoustic Strum", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Clean Electric", "Cloudy", "Commercial", "Confessional", "Contemporary", "Country Lead", "Dark", "Delicate", "Distorted Rock", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Muted Plucks", "None", "Surf Guitar", "Warm Jazz"]}, {"key": "bassStyle", "label": "Bass Style", "type": "select", "options": ["None", "808 Glide", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Deep Sub", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Finger Bass", "Fresh", "Funky Bass", "Live Electric Bass", "None", "Round Bass", "Warm Analog"]}, {"key": "strings", "label": "Strings", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Big Cinematic", "Bold", "Bright", "Cello Heavy", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Light Pad", "None", "Solo Violin", "Warm Ensemble"]}, {"key": "brass", "label": "Brass", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bold Section", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Muted", "None", "Soul Horns", "Triumphant"]}, {"key": "choirPads", "label": "Choir Pads", "type": "select", "options": ["None", "Airy", "Ambient", "Anthemic", "Artful", "Big Worship", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "None", "Soft Halo", "Textured"]}, {"key": "percussionLayers", "label": "Percussion Layers", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dense", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Hand Percussion", "Hybrid", "Minimal", "None", "Percussive Pop"]}, {"key": "ambientEffects", "label": "Ambient Effects", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Breath Textures", "Bright", "Church Room", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Crowd Noise", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Ocean Waves", "Rain", "Reverse Swells", "Street Ambience", "Tape Hiss", "Thunder", "Vinyl Crackle", "Wind"]}, {"key": "tempo", "label": "Tempo Feel", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fast", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Half-Time", "Medium", "Slow", "Uptempo"]}, {"key": "bpm", "label": "BPM", "type": "range", "min": 60, "max": 180, "step": 1, "default": 96}, {"key": "rhythmStyle", "label": "Rhythm Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Four on the Floor", "Fresh", "Half-Time", "Laid Back", "Marching", "Offbeat", "Straight", "Swinging", "Syncopated"]}, {"key": "grooveType", "label": "Groove Type", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bounce", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Driving", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Floating", "Fresh", "Head-Nod", "Pocket", "Rolling", "Slinky", "Stomp"]}, {"key": "swing", "label": "Swing", "type": "range", "min": 0, "max": 10, "step": 1, "default": 3}, {"key": "bounce", "label": "Bounce", "type": "range", "min": 0, "max": 10, "step": 1, "default": 5}, {"key": "syncopation", "label": "Syncopation", "type": "range", "min": 0, "max": 10, "step": 1, "default": 4}, {"key": "drumIntensity", "label": "Drum Intensity", "type": "range", "min": 0, "max": 10, "step": 1, "default": 6}, {"key": "productionPolish", "label": "Production Polish", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Demo Rough", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Hi-End", "Luxury Polish", "Mixed", "Polished", "Raw", "Studio Clean"]}, {"key": "rawPolished", "label": "Raw or Polished", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Hopeful", "Polished", "Raw"]}, {"key": "minimalLayered", "label": "Minimal or Layered", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Hopeful", "Layered", "Minimal", "Moderate"]}, {"key": "cleanGrittyMix", "label": "Clean Mix or Gritty Mix", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Clean", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Hopeful", "Hybrid", "Intimate"]}, {"key": "spaciousDense", "label": "Spacious or Dense Mix", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dense", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Hopeful", "Moderate", "Spacious"]}, {"key": "analogDigital", "label": "Analog or Digital Vibe", "type": "select", "options": ["None", "Ambient", "Analog", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Digital", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Hopeful"]}, {"key": "retroFuture", "label": "Retro or Futuristic", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Futuristic", "Gentle", "Golden", "Gritty", "Honest", "Hopeful", "Retro"]}, {"key": "reverbLevel", "label": "Reverb Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 5}, {"key": "delayLevel", "label": "Delay Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 3}, {"key": "autotuneLevel", "label": "Auto-Tune Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 2}, {"key": "vocalEffects", "label": "Vocal Effects", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Chorus", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delay", "Delicate", "Doubler", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Megaphone", "None", "Phone Filter", "Reverb Tail", "Wide Stack"]}, {"key": "distortionLevel", "label": "Distortion Level", "type": "range", "min": 0, "max": 10, "step": 1, "default": 1}, {"key": "bassHeaviness", "label": "Bass Heaviness", "type": "range", "min": 0, "max": 10, "step": 1, "default": 5}, {"key": "loudness", "label": "Loudness", "type": "range", "min": 0, "max": 10, "step": 1, "default": 6}]}, {"id": "storyDetails", "title": "8. Storytelling Details", "fields": [{"key": "storySetting", "label": "Story Setting", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Backroad", "Beach", "Bedroom", "Big City", "Bold", "Bright", "Church", "Cinematic", "Classic", "Cloudy", "Club", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Front Porch", "Highway", "Hotel Suite", "House Party", "Late-Night Diner", "Living Room", "Neighborhood", "Rooftop", "Studio"]}, {"key": "timePeriod", "label": "Time Period", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Childhood", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Future", "Present Day", "Teen Years", "Throwback 90s", "Timeless", "Tonight", "Yesterday"]}, {"key": "timeOfDay", "label": "Time of Day", "type": "select", "options": ["None", "Afternoon", "Ambient", "Anthemic", "Artful", "Blue Hour", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Dawn", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Late Night", "Midday", "Midnight", "Sunrise", "Sunset"]}, {"key": "season", "label": "Season", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Autumn", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Spring", "Summer", "Winter"]}, {"key": "relationshipDynamic", "label": "Relationship Dynamic", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Enemies to Lovers", "Epic", "Exes", "Experimental", "Fiery", "Friends", "Friends to Lovers", "Mentor and Student", "Self vs Self", "Soulmates", "Strangers", "Toxic Lovers"]}, {"key": "characterRole", "label": "Character Role", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Believer", "Bold", "Boss", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Daughter", "Delicate", "Dreamer", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Ex-Lover", "Experimental", "Fighter", "Healer", "Narrator", "Rebel", "Survivor"]}, {"key": "characterName", "label": "Character Name", "type": "text", "placeholder": "Optional character name"}, {"key": "backstory", "label": "Backstory", "type": "textarea", "placeholder": "Add backstory, history, or context"}, {"key": "conflict", "label": "Conflict", "type": "select", "options": ["None", "Addiction", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Distance", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Fear", "Fighting Temptation", "Financial Pressure", "God vs Ego", "Heartbreak", "Identity Crisis", "Jealousy", "Loss", "Pride", "Silence"]}, {"key": "desireGoal", "label": "Desire or Goal", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Be free", "Be loved", "Bold", "Break cycles", "Bright", "Chase purpose", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Find peace", "Get closure", "Get rich", "Go home", "Heal fully", "Prove myself", "Start over"]}, {"key": "obstacle", "label": "Obstacle", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Doubt", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Family baggage", "Inner demons", "No support", "Pride", "Public pressure", "Secrets", "Shame", "Time", "Trauma"]}, {"key": "turningPoint", "label": "Turning Point", "type": "select", "options": ["None", "A confession", "A goodbye", "A miracle", "A prayer answered", "A public win", "A relapse", "A sunrise moment", "A text message", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Truth revealed", "Walking away"]}, {"key": "climax", "label": "Climax", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Big declaration", "Bold", "Breakdown cry", "Bright", "Church shout", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Confrontation", "Contemporary", "Dance release", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Final goodbye", "Forgiveness moment", "Public victory", "Quiet surrender"]}, {"key": "resolution", "label": "Resolution", "type": "select", "options": ["None", "Ambient", "Ambiguous", "Anthemic", "Artful", "Bittersweet peace", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Freedom", "Love restored", "Open-ended", "Personal victory", "Reunion", "Spiritual surrender", "Sweet revenge"]}, {"key": "plotTwist", "label": "Plot Twist", "type": "select", "options": ["None", "A new love appears", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "God was moving all along", "I was the problem too", "It was all a memory", "None", "The enemy becomes the helper", "The letter was never sent"]}, {"key": "endingTone", "label": "Ending Tone", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bittersweet", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Hopeful", "Open", "Peaceful", "Triumphant", "Unresolved"]}, {"key": "symbolicObject", "label": "Symbolic Object", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bible", "Bold", "Bright", "Car keys", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Crown", "Dark", "Delicate", "Dreamy", "Dress", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Mirror", "Photograph", "Raincoat", "Ring", "Rose", "Shoebox"]}, {"key": "repeatingImage", "label": "Repeating Image", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "City lights", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Doorway", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fire", "Ocean", "Rain", "Road lines", "Smoke", "Sunrise", "Tears", "Windows"]}, {"key": "flashback", "label": "Memory or Flashback Element", "type": "select", "options": ["None", "A childhood room", "A voicemail", "Ambient", "An old church", "An old photo", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "First dance", "Graduation day", "Hospital room", "Summer nights", "The first kiss"]}, {"key": "emotionalArc", "label": "Emotional Arc", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Broken to brave", "Cinematic", "Classic", "Cloudy", "Cold to open", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Doubt to faith", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Grief to gratitude", "Lost to found", "Pain to power", "Pride to surrender", "Soft to strong"]}]}, {"id": "audienceUse", "title": "9. Audience & Commercial Use", "fields": [{"key": "targetAudience", "label": "Target Audience", "type": "select", "options": ["None", "Adults", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Christian audience", "Cinematic", "Classic", "Cloudy", "Club crowd", "Commercial", "Confessional", "Contemporary", "Content creators", "Country fans", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Gen Z", "Heartbroken listeners", "Luxury lifestyle fans", "Moms", "Romantics", "Women over 40", "Worship listeners"]}, {"key": "ageGroup", "label": "Age Group", "type": "select", "options": ["None", "13-17", "18-24", "25-34", "35-44", "45-54", "55+", "All Ages", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle"]}, {"key": "listenerMoodGoal", "label": "Listener Mood Goal", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Feel comforted", "Feel hyped", "Feel seen", "Feel sexy", "Feel strong", "Feel worshipful", "Fiery", "Fresh", "Reflect deeply", "Sing loudly"]}, {"key": "intendedUse", "label": "Intended Use", "type": "multiselect", "options": ["None", "Ad", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Church", "Cinematic", "Classic", "Cloudy", "Club", "Commercial", "Concert", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Film", "Personal Listening", "Radio", "Reels", "TikTok", "Trailer", "Wedding", "Workout", "YouTube"]}, {"key": "viralSnippet", "label": "Viral Snippet Section", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bridge", "Bright", "Chorus", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Hook intro", "Outro line", "Pre-chorus", "Verse punchline"]}, {"key": "tiktokLine", "label": "TikTok-Ready Line", "type": "text", "placeholder": "Short line for clips and captions"}, {"key": "hookMemorability", "label": "Hook Memorability", "type": "range", "min": 1, "max": 10, "step": 1, "default": 7}, {"key": "trendPotential", "label": "Trend Potential", "type": "range", "min": 1, "max": 10, "step": 1, "default": 6}, {"key": "crossoverAppeal", "label": "Crossover Appeal", "type": "range", "min": 1, "max": 10, "step": 1, "default": 5}, {"key": "radioEdit", "label": "Radio Edit Potential", "type": "range", "min": 1, "max": 10, "step": 1, "default": 5}, {"key": "syncPotential", "label": "Sync Licensing Potential", "type": "range", "min": 1, "max": 10, "step": 1, "default": 5}, {"key": "danceChallenge", "label": "Dance Challenge Potential", "type": "range", "min": 1, "max": 10, "step": 1, "default": 4}, {"key": "captionLyric", "label": "Caption-Worthy Lyric", "type": "text", "placeholder": "A line fans would post"}]}, {"id": "visualBranding", "title": "10. Visual Branding", "fields": [{"key": "albumCoverVibe", "label": "Album Cover Vibe", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bold editorial", "Bright", "Cinematic", "Classic", "Clean portrait", "Cloudy", "Collage", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Luxury minimal", "Moody neon", "Retro", "Soft romantic", "Street luxe"]}, {"key": "colorPalette", "label": "Color Palette", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Black and Gold", "Blue Hour", "Blush and Cream", "Bold", "Bright", "Burnt Orange", "Champagne", "Cherry Red", "Cinematic", "Classic", "Cloudy", "Cobalt and Silver", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Emerald", "Lavender", "Monochrome", "Neon Pink", "Sage and Sand", "Sunset", "Velvet Plum", "White and Gold"]}, {"key": "brandColor", "label": "Accent Color", "type": "color", "default": "#7c3aed"}, {"key": "fashionStyle", "label": "Fashion Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Boho", "Bold", "Bright", "Church chic", "Cinematic", "Classic", "Classic glamour", "Cloudy", "Commercial", "Confessional", "Contemporary", "Country denim", "Couture", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Edgy streetwear", "Elegant", "Emotional", "Epic", "Experimental", "Festival", "Luxury eveningwear", "Minimal modern", "Soft feminine"]}, {"key": "artistBrandVibe", "label": "Artist Branding Vibe", "type": "multiselect", "options": ["None", "Ambient", "Anthemic", "Artful", "Authentic", "Bold", "Bossed up", "Bright", "Church rooted", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Feminine power", "Luxury", "Mysterious", "Playful", "Raw", "Spiritual", "Street"]}, {"key": "musicVideoConcept", "label": "Music Video Concept", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Backroad story", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Club fantasy", "Commercial", "Concert performance", "Confessional", "Contemporary", "Dark", "Delicate", "Dream sequence", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Mirror room", "Monumental city scene", "One-take performance", "Road trip", "Sanctuary glow", "Studio editorial"]}, {"key": "stageDesign", "label": "Stage Design", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bright", "Catwalk stage", "Choir risers", "Church set", "Cinematic", "Classic", "Cloudy", "Club LED wall", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fog heavy", "Fresh", "Minimal spotlight", "Pyro build", "Runway luxe"]}, {"key": "lightingDirection", "label": "Lighting Direction", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Backlit glow", "Blue hour", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Golden spotlight", "Hard contrast", "High-key clean", "Moody shadows", "Soft diffused", "Strobe flashes"]}, {"key": "performanceSetting", "label": "Performance Setting", "type": "select", "options": ["None", "Ambient", "Anthemic", "Arena", "Artful", "Beach", "Bold", "Bright", "Church", "Cinematic", "City rooftop", "Classic", "Cloudy", "Club", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Field", "Intimate theater", "Street corner", "Studio", "Warehouse"]}, {"key": "socialVisualVibe", "label": "Social Media Visual Vibe", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Bold", "Bold captions", "Bright", "Cinematic", "Classic", "Clean luxury", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Diary style", "Dreamy", "Dynamic", "Earthy", "Editorial glam", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Meme-friendly", "Minimal quotes", "Neon clips", "Soft pastel"]}, {"key": "streetLuxury", "label": "Street or Luxury Aesthetic", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Luxury", "Street", "Street luxe"]}, {"key": "visualScale", "label": "Minimal or Maximal Visual Style", "type": "select", "options": ["None", "Ambient", "Anthemic", "Artful", "Balanced", "Bold", "Bright", "Cinematic", "Classic", "Cloudy", "Commercial", "Confessional", "Contemporary", "Dark", "Delicate", "Dreamy", "Dynamic", "Earthy", "Elegant", "Emotional", "Epic", "Experimental", "Fiery", "Fresh", "Gentle", "Golden", "Gritty", "Honest", "Hopeful", "Maximal", "Minimal"]}]}, {"id": "customNotes", "title": "11. Custom Notes", "fields": [{"key": "customKeywords", "label": "Custom Keyword Tags", "type": "multiselect", "options": ["None", "Ambient", "Anointed", "Anthemic", "Artful", "Bold", "Boss", "Breakthrough", "Bright", "Chill", "Churchy", "Cinematic", "Confidence", "Cry-worthy", "Danceable", "Elegant", "Flirty", "Grace", "Healing", "Luxury", "Nostalgic", "Prayerful", "Raw", "Romantic", "Seductive", "Soft", "Story-rich", "Summer", "Tearjerker", "Triumphant", "Viral"]}, {"key": "mustUsePhrase", "label": "Must-Use Phrase", "type": "text", "placeholder": "Phrase that must appear"}, {"key": "mustAvoidPhrase", "label": "Must-Avoid Phrase", "type": "text", "placeholder": "Words or phrases to avoid"}, {"key": "customChorus", "label": "Custom Chorus Line", "type": "textarea", "placeholder": "Drop in a line or chorus idea"}, {"key": "storyNotes", "label": "Story Notes", "type": "textarea", "placeholder": "Anything important about the story"}, {"key": "vocalNotes", "label": "Vocal Notes", "type": "textarea", "placeholder": "References for delivery or ad-libs"}, {"key": "productionNotes", "label": "Production Notes", "type": "textarea", "placeholder": "Mix, instruments, sonic notes"}, {"key": "personalDedication", "label": "Personal Dedication", "type": "textarea", "placeholder": "Who this song is for"}, {"key": "artistBrandNotes", "label": "Artist or Brand Notes", "type": "textarea", "placeholder": "Brand vibe, audience, or artist identity"}, {"key": "extraInstructions", "label": "Extra Instructions", "type": "textarea", "placeholder": "Anything else the generator should know"}, {"key": "customFullLyrics", "label": "Custom Full Lyrics", "type": "textarea", "placeholder": "Write your own full lyrics here. If you use this box, Suno Mode will use these lyrics instead of generated lyrics."}]}], "presets": [{"name": "Heartbreak Anthem", "desc": "Big emotion, replayable hook, bruised but powerful.", "values": {"genre": "Pop", "subgenre": "Dark Pop", "mainTheme": ["Heartbreak", "Healing"], "overallMood": ["Bittersweet", "Empowering"], "primaryEmotion": ["Heartache"], "chorusStyle": "Big Singalong", "hookStyle": ["Anthemic", "Emotional"], "vocalType": "Pure Singing", "tempo": "Medium", "bpm": 96, "musicVideoConcept": "Mirror room"}}, {"name": "Soft Love Ballad", "desc": "Tender romance with intimate vocals and warm piano.", "values": {"genre": "R&B", "subgenre": "Neo-Soul Ballad", "mainTheme": ["Love"], "overallMood": ["Gentle", "Romantic"], "primaryEmotion": ["Love"], "chorusStyle": "Gentle Lift", "pianoStyle": "Ballad Piano", "vocalTone": "Velvety", "tempo": "Slow", "bpm": 74}}, {"name": "Girls Night Out", "desc": "Playful, bold, glittery and ready for a pregame.", "values": {"genre": "Pop", "subgenre": "Electro Pop", "mainTheme": ["Confidence", "Friendship"], "overallMood": ["Bold", "Playful"], "primaryEmotion": ["Confidence", "Joy"], "intendedUse": ["Club", "Reels", "TikTok"], "tempo": "Fast", "bpm": 118, "fashionStyle": "Luxury eveningwear"}}, {"name": "Boss-Up Anthem", "desc": "Confident comeback energy with punchy one-liners.", "values": {"genre": "Hip-Hop", "subgenre": "West Coast Rap", "mainTheme": ["Confidence", "Victory"], "overallMood": ["Bold", "Triumphant"], "primaryEmotion": ["Confidence"], "hookStyle": ["Anthemic", "Catchphrase"], "viralOneLiner": "I built the throne they tried to bury me under", "tempo": "Medium", "bpm": 102}}, {"name": "Trap Pain", "desc": "Melodic pain with dark atmosphere and raw honesty.", "values": {"genre": "Trap", "subgenre": "Trap Soul", "mainTheme": ["Heartbreak", "Survival"], "overallMood": ["Dark", "Moody"], "primaryEmotion": ["Heartache", "Sadness"], "vocalType": "Melodic Rap", "bassStyle": "808 Glide", "bpm": 138}}, {"name": "Summer Vibe", "desc": "Easy breeze, catchy hook, bright visuals.", "values": {"genre": "Afrobeats", "subgenre": "Chillhop", "mainTheme": ["Joy", "Love"], "overallMood": ["Airy", "Celebratory"], "primaryEmotion": ["Happiness"], "atmosphere": ["Beach", "Golden Hour", "Summer Night"], "bpm": 108, "intendedUse": ["Reels", "TikTok", "YouTube"]}}, {"name": "Worship Praise", "desc": "Lifted, spiritual, choir-backed praise record.", "values": {"genre": "Worship", "subgenre": "Modern Worship", "mainTheme": ["Faith", "Prayer", "Victory"], "overallMood": ["Prayerful", "Spiritual", "Uplifting"], "choirVocals": "Big Finale", "choirPads": "Big Worship", "purposeSong": "Church set", "intendedUse": ["Church", "YouTube"]}}, {"name": "Country Confession", "desc": "Honest storytelling over warm strings and guitar.", "values": {"genre": "Country", "subgenre": "Country Pop", "mainTheme": ["Forgiveness", "Love"], "storySetting": "Backroad", "guitarStyle": "Country Lead", "overallMood": ["Reflective", "Warm"], "bpm": 84}}, {"name": "Viral TikTok Bop", "desc": "Fast, catchy, repeatable, clip-first structure.", "values": {"genre": "Pop", "subgenre": "Y2K Pop", "overallMood": ["Bold", "Playful"], "hookStyle": ["Earworm", "Repeatable"], "viralOneLiner": "Watch me glow where you left me", "intendedUse": ["TikTok", "Reels"], "viralSnippet": "Chorus", "bpm": 126}}, {"name": "Cinematic Trailer Song", "desc": "Huge rise, drama, tension and payoff.", "values": {"genre": "Alternative", "marketStyle": "Cinematic", "overallMood": ["Epic", "Serious"], "strings": "Big Cinematic", "bridgeType": "Climactic", "intendedUse": ["Film", "Trailer"], "bpm": 92}}, {"name": "Healing Journey", "desc": "Reflection, grace, growth and gentle power.", "values": {"genre": "Neo-Soul", "mainTheme": ["Healing", "Peace", "Transformation"], "overallMood": ["Reflective", "Soft", "Hopeful"], "primaryEmotion": ["Hope"], "pianoStyle": "Rhodes", "tempo": "Slow", "bpm": 80}}, {"name": "Breakup Revenge Song", "desc": "Sharp lines, glamorous visuals, no apologies.", "values": {"genre": "Pop", "subgenre": "Dark Pop", "mainTheme": ["Revenge", "Self-Love"], "overallMood": ["Bold", "Moody"], "primaryEmotion": ["Confidence", "Pride"], "fashionStyle": "Couture", "musicVideoConcept": "Monumental city scene", "bpm": 110}}, {"name": "Luxury Seduction", "desc": "Silky, upscale, intimate, and expensive.", "values": {"genre": "R&B", "subgenre": "Alternative R&B", "mainTheme": ["Desire", "Love"], "overallMood": ["Luxurious", "Sensual"], "primaryEmotion": ["Desire"], "vocalTone": "Silky", "streetLuxury": "Luxury", "bpm": 88}}, {"name": "Party Club Hit", "desc": "Big bounce, chant hook, packed dance floor.", "values": {"genre": "Dance", "subgenre": "Deep House", "overallMood": ["Bold", "Celebratory"], "primaryEmotion": ["Joy"], "grooveType": "Bounce", "intendedUse": ["Club", "Concert", "TikTok"], "bpm": 124}}, {"name": "Motivational Comeback", "desc": "Rise-up energy with triumphant payoff.", "values": {"genre": "Hip-Hop", "subgenre": "Emo Rap", "mainTheme": ["Breakthrough", "Victory"], "overallMood": ["Empowering", "Triumphant"], "primaryEmotion": ["Determination"], "purposeSong": "Motivational soundtrack", "bpm": 100}}], "starterSongs": [["Midnight Mercy", "A late-night prayer song that moves from shame to surrender over piano, pads, and a choir lift."], ["Pink Motel", "A dreamy retro-pop love song set during a neon roadside escape."], ["Backroad Amen", "A country-worship crossover about finding God after a messy season."], ["Crown Me Softly", "A luxury R&B song about self-worth, softness, and standards."], ["No More Small", "A boss-up anthem with confident bars and a sticky chant chorus."], ["Summer on Replay", "An Afrobeats-pop flirt song built for reels and rooftop clips."], ["After the Smoke", "A trap-pain record about betrayal, silence, and still surviving."], ["House of Healing", "A gospel-soul song about returning to peace after anxiety."], ["Velvet Trouble", "A seductive alternative R&B record with elegant danger in the lyrics."], ["Rise in the Rain", "A cinematic comeback song with thunder textures and a final giant chorus."]], "lyricPrompts": ["Write a chorus that feels like crying in the car but still knowing you'll be okay.", "Write a verse from the point of view of someone finally choosing peace over chaos.", "Create a hook that sounds expensive, feminine, and unforgettable.", "Write a bridge where the character stops begging and starts walking away.", "Give me a prayerful opening line that sounds honest, not preachy.", "Write a love song from the angle of healed, grown-up love.", "Create a TikTok-ready one-liner about glowing up after heartbreak.", "Write a country verse with one small-town detail and one gut-punch confession.", "Make a chorus people can scream with their friends on a girls\u2019 night out.", "Write a revenge line that sounds classy, not bitter.", "Create a worship lyric that centers gratitude after a hard season.", "Write a soft intro that feels like sunrise after tears.", "Give me a seductive line that still feels elegant.", "Write a trap-soul melody idea about missing someone you should leave alone.", "Create a line about trusting God when nothing makes sense yet.", "Write a bridge that turns the whole meaning of the song upside down.", "Give me a heartbreak metaphor that doesn't use rain or broken glass.", "Write a hook for a comeback anthem after everyone counted you out.", "Create an opening verse with cinematic tension and visual detail.", "Write a short chant hook that would work in a stadium.", "Give me a vulnerable line about pretending to be fine online.", "Write a song concept around a missed voicemail from someone you love.", "Create a lyric about feminine softness being a kind of strength.", "Write a chorus for a road-trip romance that won't last forever.", "Give me a caption-worthy lyric about protecting your peace.", "Write a raw confessional bar about shame turning into wisdom.", "Create a dreamy line about a city glowing like possibility.", "Write a worship refrain about grace meeting you in the mess.", "Give me a flirty pre-chorus that builds tension without sounding cheesy.", "Write a melodic rap line about choosing discipline over distraction.", "Create a visual-rich verse set in a church parking lot at midnight.", "Write a hook built around the phrase 'I came back different.'", "Give me a memory line tied to perfume, music, or headlights.", "Write a breakup line that sounds final, calm, and cold.", "Create a dance-pop chorus with only simple, repeatable words.", "Write a verse about being the villain in someone else's story.", "Give me a spiritual line about God pulling you out gently.", "Write a romantic lyric that feels mature and safe instead of obsessive.", "Create a post-chorus chant for a viral party song.", "Write a soft but strong line about not shrinking anymore.", "Give me a trailer-style lyric with danger, urgency, and hope.", "Write a chorus that sounds like healing with expensive taste.", "Create a line where the character finally forgives themselves.", "Write a late-night confession with one symbolic object.", "Give me a hook around the tension between lust and loyalty.", "Write an outro line that leaves the story open-ended.", "Create a bridge for a song about mother-daughter strength.", "Write a powerful line about surviving what almost defined you.", "Give me an anthem phrase for women over 40 stepping into a new era.", "Write a hook for a summer song that isn't generic beach talk.", "Create a lyric about looking good while rebuilding your life.", "Write a verse about a first love that still echoes years later.", "Give me a churchy choir response line for the final chorus.", "Write a moody line about city lights hiding loneliness.", "Create a spoken interlude idea that feels intimate and cinematic."]};
+const MODES = [
+  {id:'lyrics', title:'Lyrics Mode', desc:'Lyric ideas, writing direction, hooks, and chorus paths.'},
+  {id:'concept', title:'Song Concept Mode', desc:'Full concept, story angle, branding, and audience fit.'},
+  {id:'suno', title:'Suno Mode', desc:'Separate title, style, lyrics, and paste-ready Custom Mode output.'}
+];
+const state = {mode:'lyrics', outputs:{lyrics:{},concept:{},suno:{}}, saved: JSON.parse(localStorage.getItem('songSavedPresets')||'[]')};
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function note(t){const n=$('#notice');n.textContent=t;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),1600);}
+function fieldDef(k){for(const s of APP.sections){for(const f of s.fields){if(f.key===k)return f;}}}
+function setVal(k,v){const el=$(`[name="${k}"]`);const f=fieldDef(k);if(!el||!f)return;if(f.type==='multiselect'){const vals=Array.isArray(v)?v:[v];[...el.options].forEach(o=>o.selected=vals.includes(o.value));syncTags();}else if(f.type==='toggle'){el.checked=!!v;}else{el.value=v??'';if(f.type==='range'){const o=$(`[data-out="${k}"]`);if(o)o.textContent=el.value;}}}
+function getVal(k){const el=$(`[name="${k}"]`);const f=fieldDef(k);if(!el||!f)return'';if(f.type==='multiselect')return[...el.selectedOptions].map(o=>o.value).filter(v=>v&&v!=='None');if(f.type==='toggle')return el.checked;return el.value;}
+function allData(){const obj={};APP.sections.forEach(s=>s.fields.forEach(f=>obj[f.key]=getVal(f.key)));return obj;}
+function nonEmpty(v){if(Array.isArray(v))return v.length>0;if(typeof v==='boolean')return v;return String(v).trim() && String(v).trim()!=='None';}
+function updateProgress(){let t=0,f=0;APP.sections.forEach(s=>s.fields.forEach(x=>{t++;if(nonEmpty(getVal(x.key)))f++;}));const p=Math.round((f/t)*100);$('#bar').style.width=p+'%';$('#pctText').textContent=p+'%';}
+function makeModes(){const g=$('#modeGrid');g.innerHTML=MODES.map(m=>`<button class="btn card pad ${state.mode===m.id?'activeCard':''}" data-mode="${m.id}"><strong>${m.title}</strong><div class="small" style="margin-top:8px">${m.desc}</div></button>`).join('');$$('[data-mode]',g).forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;makeModes();makeTabs();note('Output mode changed.');});}
+function makePresets(){const g=$('#presetGrid');const all=[...APP.presets,...state.saved];g.innerHTML=all.map((p,i)=>`<button class="btn card pad" data-preset="${i}"><strong>${p.name}</strong><div class="small" style="margin-top:8px">${p.desc||'Saved custom preset.'}</div></button>`).join('');$$('[data-preset]',g).forEach(b=>b.onclick=()=>loadPreset(all[Number(b.dataset.preset)]));}
+function makeStarter(){const g=$('#starterGrid');g.innerHTML=APP.starterSongs.map(([t,d])=>`<div class="card pad"><strong>${t}</strong><div class="small" style="margin-top:8px">${d}</div><div class="row" style="margin-top:12px"><button class="btn" data-use="${esc(t+' — '+d)}">Use in Notes</button></div></div>`).join('');$$('[data-use]',g).forEach(b=>b.onclick=()=>{const el=$('[name="extraInstructions"]');el.value=el.value?el.value+'\nStarter Example: '+b.dataset.use:'Starter Example: '+b.dataset.use;updateProgress();note('Starter added to notes.');});}
+function makePrompts(q=''){const g=$('#promptGrid');const list=APP.lyricPrompts.filter(p=>!q||p.toLowerCase().includes(q.toLowerCase()));g.innerHTML=list.map((p,i)=>`<div class="card pad"><strong>Lyric Prompt ${i+1}</strong><div class="small" style="margin:10px 0 14px">${p}</div><div class="row"><button class="btn" data-copy="${esc(p)}">Copy</button><button class="btn green" data-insert="${esc(p)}">Add to Notes</button></div></div>`).join('');$$('[data-copy]',g).forEach(b=>b.onclick=async()=>{await navigator.clipboard.writeText(b.dataset.copy);note('Prompt copied.');});$$('[data-insert]',g).forEach(b=>b.onclick=()=>{const el=$('[name="extraInstructions"]');el.value=el.value?el.value+'\n'+b.dataset.insert:b.dataset.insert;updateProgress();note('Prompt added to notes.');});}
+function fieldHTML(f){
+  const help=f.placeholder|| (f.type==='multiselect'?'Select more than one where it makes sense.': f.type==='range'?'Slide to adjust.':' ');
+  if(f.type==='text') return `<div class="field"><div class="label">${f.label}${f.required?' *':''}</div><input class="input" name="${f.key}" placeholder="${esc(f.placeholder||'')}"><div class="small">${help}</div></div>`;
+  if(f.type==='textarea') return `<div class="field"><div class="label">${f.label}</div><textarea name="${f.key}" maxlength="600" placeholder="${esc(f.placeholder||'')}"></textarea><div class="small">${help}</div></div>`;
+  if(f.type==='select') return `<div class="field"><div class="label">${f.label}</div><select class="select" name="${f.key}">${f.options.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select><div class="small">${help}</div></div>`;
+  if(f.type==='multiselect') return `<div class="field"><div class="label">${f.label}</div><div class="multi"><div class="tags" id="tags-${f.key}"></div><select class="select" name="${f.key}" multiple size="8">${f.options.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select><div class="row" style="margin-top:10px"><button type="button" class="btn" data-clear-multi="${f.key}">Clear</button><span class="small">Ctrl/⌘ lets you pick multiple too.</span></div></div><div class="small">${help}</div></div>`;
+  if(f.type==='range') return `<div class="field"><div class="label">${f.label}</div><div class="row"><input class="input" style="padding:0" type="range" min="${f.min}" max="${f.max}" step="${f.step||1}" value="${f.default??f.min}" name="${f.key}"><span class="btn" data-out="${f.key}">${f.default??f.min}</span></div><div class="small">${help}</div></div>`;
+  if(f.type==='toggle') return `<div class="field"><div class="label">${f.label}</div><label class="row"><input type="checkbox" name="${f.key}"> <span class="small">Toggle on/off</span></label><div class="small">${help}</div></div>`;
+  if(f.type==='color') return `<div class="field"><div class="label">${f.label}</div><input class="input" type="color" name="${f.key}" value="${f.default||'#7c3aed'}" style="height:52px;padding:8px"><div class="small">${help}</div></div>`;
+  return '';
+}
+function buildForm(){const form=$('#form');form.innerHTML=APP.sections.map(s=>`<div class="card section"><details open><summary>${s.title}</summary><div class="formgrid">${s.fields.map(fieldHTML).join('')}</div><div class="toolbar row"><button type="button" class="btn" data-rand-sec="${s.id}">Randomize Section</button><button type="button" class="btn" data-clear-sec="${s.id}">Clear Section</button></div></details></div>`).join('');$$('input,textarea,select',form).forEach(el=>{el.addEventListener('input',()=>{syncTags();syncRanges();updateProgress();});el.addEventListener('change',()=>{syncTags();syncRanges();updateProgress();});});$$('[data-clear-multi]',form).forEach(b=>b.onclick=()=>{const s=$(`[name="${b.dataset.clearMulti}"]`);[...s.options].forEach(o=>o.selected=false);syncTags();updateProgress();});$$('[data-rand-sec]',form).forEach(b=>b.onclick=()=>randomSection(b.dataset.randSec));$$('[data-clear-sec]',form).forEach(b=>b.onclick=()=>clearSection(b.dataset.clearSec));syncTags();syncRanges();updateProgress();}
+function syncRanges(){$$('input[type="range"]').forEach(r=>{const o=$(`[data-out="${r.name}"]`);if(o)o.textContent=r.value;});}
+function syncTags(){$$('select[multiple]').forEach(s=>{const box=$('#tags-'+s.name);if(!box)return;const vals=[...s.selectedOptions].map(o=>o.value).filter(v=>v!=='None');box.innerHTML=vals.map(v=>`<span class="tag">${esc(v)}</span>`).join('');});}
+function clearSection(id){const sec=APP.sections.find(s=>s.id===id);if(!sec)return;sec.fields.forEach(f=>{if(f.type==='multiselect')setVal(f.key,[]);else if(f.type==='toggle')setVal(f.key,false);else if(f.type==='range')setVal(f.key,f.default??f.min??0);else if(f.type==='color')setVal(f.key,f.default||'#7c3aed');else setVal(f.key,'');});syncTags();syncRanges();updateProgress();note(sec.title+' cleared.');}
+function clearAll(){APP.sections.forEach(s=>clearSection(s.id));note('All fields cleared.');}
+function pick(list){const a=list.filter(v=>v!=='None');return a[Math.floor(Math.random()*a.length)];}
+function pickMulti(list){const a=list.filter(v=>v!=='None').sort(()=>Math.random()-.5);return a.slice(0,Math.max(1,Math.min(4,Math.floor(Math.random()*4)+1)));}
+const RANDOM_TEXT_BANK={"songTitle": ["After the Gold Light", "Backroad Hallelujah", "Blue Velvet Revival", "Champagne on the Dashboard", "City of Second Chances", "Crown Me in Quiet", "Don't Text Me at Midnight", "Dust on My Halo", "First Name Freedom", "Glow Through the Ache", "Gold Teeth, Soft Heart", "Heaven in the Rearview", "House of Healing", "I Look Better in Peace", "Late Night Testimony", "Lip Gloss and Lightning", "Midnight Mercy", "No More Small", "Pink Motel Prayer", "Rose After Rain", "Silk Over Scars", "Soft Life Sermon", "Somebody Else's Goodbye", "Sunday on the Speakers", "Velvet Weather", "Watch Me Win Softly"], "alternateTitle": ["After Hours Edit", "After the Silence", "Backseat Version", "Breakthrough Mix", "Church Parking Lot Cut", "Deluxe Heart Version", "Golden Hour Reprise", "Midnight Rewrite", "Moonlight Edition", "No Looking Back", "Second Name", "Soft Cut", "Soft Glow Version", "The Long Way Home", "Velvet Outro"], "repeatedPhrase": ["I came back different", "I wear peace real pretty", "Meet me in the glow", "No more small living", "Still here, still shining", "You can't dim what God lit"], "viralOneLiner": ["Pretty, peaceful, and impossible to play with", "Soft don't mean weak", "They watched me win in peace", "Too healed to beg", "Whole lot of grace with a backbone"], "characterName": ["Ava", "Faith", "Maya", "Nova", "Sage", "Zuri"], "tiktokLine": ["They watched me glow where they left me.", "I made peace look expensive.", "They counted me out while I was building quietly."], "captionLyric": ["Peace looks too good on me.", "Healing gave me a better attitude.", "Softness was never weakness."], "mustUsePhrase": ["grace in motion", "healed on purpose", "soft but dangerous"], "mustAvoidPhrase": ["broken heart", "same old me", "too far gone"]};
+const lastRandomText={};
+function pickNoRepeat(list,key){const a=(list||[]).filter(Boolean);if(!a.length)return'';if(a.length===1)return a[0];let choice=a[Math.floor(Math.random()*a.length)];let tries=0;while(choice===lastRandomText[key]&&tries<12){choice=a[Math.floor(Math.random()*a.length)];tries++;}lastRandomText[key]=choice;return choice;}
+function randText(k){const a=RANDOM_TEXT_BANK[k]||['custom note'];return pickNoRepeat(a,k);}
+function randArea(k){const map={backstory:'The character outgrew an old version of herself after a painful season.',customChorus:'I came back different, softer but stronger, brighter in the midnight blue.',storyNotes:'Build from tension into release by the final chorus.',vocalNotes:'Start intimate, then open with stacked harmonies.',productionNotes:'Warm low end, polished top line, wider final chorus.',personalDedication:'Dedicated to anyone rebuilding quietly after heartbreak.',artistBrandNotes:'Elegant but relatable with strong feminine energy.',extraInstructions:'Keep it honest, memorable, and cinematic.'};return map[k]||'Add custom notes here.';}
+function randField(f){if(f.type==='select')return pick(f.options);if(f.type==='multiselect')return pickMulti(f.options);if(f.type==='range')return Math.floor(Math.random()*((f.max-f.min)+1))+f.min;if(f.type==='toggle')return Math.random()>.5;if(f.type==='color')return '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');if(f.type==='text')return randText(f.key);if(f.type==='textarea')return randArea(f.key);return'';}
+function randomSection(id){const sec=APP.sections.find(s=>s.id===id);if(!sec)return;sec.fields.forEach(f=>setVal(f.key,randField(f)));syncTags();syncRanges();updateProgress();note(sec.title+' randomized.');}
+function randomAll(){APP.sections.forEach(s=>s.fields.forEach(f=>setVal(f.key,randField(f))));
+  const songTitleEl=$('[name="songTitle"]');
+  const altTitleEl=$('[name="alternateTitle"]');
+  if(songTitleEl&&altTitleEl){
+    if(!songTitleEl.value.trim()) songTitleEl.value=randText('songTitle');
+    if(!altTitleEl.value.trim()||altTitleEl.value.trim()===songTitleEl.value.trim()){
+      let alt=randText('alternateTitle');
+      let tries=0;
+      while(alt===songTitleEl.value.trim()&&tries<12){alt=randText('alternateTitle');tries++;}
+      altTitleEl.value=alt;
+    }
+  }
+  syncTags();syncRanges();updateProgress();note('All sections randomized with a fresh title set.');}
+const PRESET_GENRE_SUBGENRES={
+  'Afrobeats':'Chillhop','Alternative':'Dream Pop','Blues':'Southern Soul','Boom Bap':'Jazz Rap','Classical Crossover':'Christian Contemporary',
+  'Country':'Country Pop','Dance':'Electro Pop','Dancehall':'Trap Soul','Disco':'Y2K Pop','Drill':'Rage Rap','EDM':'Future Bass',
+  'Folk':'Indie Folk','Funk':'G-Funk','Gospel':'Urban Gospel','Grunge':'Garage Rock','Hip-Hop':'West Coast Rap','House':'Deep House',
+  'Indie Pop':'Bedroom Pop','Jazz':'Jazz Rap','Latin Pop':'Latin Pop','Lo-Fi':'Lo-Fi Soul','Neo-Soul':'Neo-Soul Ballad','Pop':'Acoustic Pop',
+  'R&B':'Alternative R&B','Reggaeton':'Latin Pop','Rock':'Pop Punk','Soul':'Southern Soul','Trap':'Trap Soul','Trip-Hop':'Chillhop','Worship':'Modern Worship'
+};
+function smartFillField(f,currentGenre){
+  if(f.key==='songTitle')return randText('songTitle');
+  if(f.key==='alternateTitle')return randText('alternateTitle');
+  if(f.key==='genre')return currentGenre||randField(f);
+  if(f.key==='subgenre'){
+    if(currentGenre&&PRESET_GENRE_SUBGENRES[currentGenre])return PRESET_GENRE_SUBGENRES[currentGenre];
+    return randField(f);
+  }
+  if(f.key==='genreFusion'&&currentGenre)return uniq([currentGenre,pick(f.options.filter(v=>v!=='None'&&v!==currentGenre))]);
+  if(f.key==='songConcept')return lineFromParts([currentGenre||'Genre-flex',pick(['late-night confession','big comeback energy','healing after heartbreak','luxury soft-life glow-up','faith through pressure','TikTok-ready replay value'])],'A strong song concept.');
+  return randField(f);
+}
+function fillPresetBlanks(currentGenre){
+  APP.sections.forEach(s=>s.fields.forEach(f=>{
+    const val=getVal(f.key);
+    const empty=(Array.isArray(val)&&!val.length)||(!Array.isArray(val)&&!nonEmpty(val));
+    if(empty)setVal(f.key,smartFillField(f,currentGenre));
+  }));
+  const songTitleEl=$('[name="songTitle"]');
+  const altTitleEl=$('[name="alternateTitle"]');
+  if(songTitleEl&&altTitleEl&&altTitleEl.value.trim()===songTitleEl.value.trim()) altTitleEl.value=randText('alternateTitle');
+}
+function loadPreset(p){
+  clearAll();
+  Object.entries(p.values||{}).forEach(([k,v])=>setVal(k,v));
+  const genreOverride=$('#presetGenreOverride')?.value||'';
+  const useFillAll=$('#presetFillAll')?.checked;
+  const chosenGenre=genreOverride||getVal('genre')||'';
+  if(genreOverride){
+    setVal('genre',genreOverride);
+    if(PRESET_GENRE_SUBGENRES[genreOverride])setVal('subgenre',PRESET_GENRE_SUBGENRES[genreOverride]);
+    const currentFusion=getVal('genreFusion');
+    if(Array.isArray(currentFusion)&&!currentFusion.length)setVal('genreFusion',[genreOverride]);
+  }
+  if(useFillAll)fillPresetBlanks(chosenGenre);
+  syncTags();syncRanges();updateProgress();
+  note('Preset loaded: '+p.name+(genreOverride?' • genre override: '+genreOverride:''));
+}
+function savePreset(){const name=prompt('Name this preset:');if(!name)return;state.saved.push({name,desc:'Saved from your current setup.',values:allData()});localStorage.setItem('songSavedPresets',JSON.stringify(state.saved));makePresets();note('Preset saved.');}
+function linesForSection(data,s){const lines=[];s.fields.forEach(f=>{const v=data[f.key];if(Array.isArray(v)&&v.length)lines.push(f.label+': '+v.join(', '));else if(typeof v==='boolean'&&v)lines.push(f.label+': Yes');else if(nonEmpty(v))lines.push(f.label+': '+v);});return lines;}
+function join(v){if(Array.isArray(v))return v.join(', ');if(typeof v==='boolean')return v?'Yes':'No';return String(v||'').trim();}
+
+function listOf(v,fallback=''){const arr=Array.isArray(v)?v.filter(Boolean):String(v||'').split(',').map(x=>x.trim()).filter(Boolean);return arr.length?arr:(fallback?[fallback]:[]);}
+function uniq(arr){return [...new Set(arr.filter(Boolean))];}
+function pickFrom(arr,fallback=''){const a=arr.filter(Boolean);return a.length?a[Math.floor(Math.random()*a.length)]:fallback;}
+function sanitizePhrase(s){return String(s||'').replace(/[\[\]{}()]/g,'').trim();}
+function lineFromParts(parts,fallback){const out=parts.map(x=>sanitizePhrase(x)).filter(Boolean).join(' ').replace(/\s+/g,' ').trim();return out||fallback;}
+function buildStylePrompt(d,title,genre,mood,themes){
+  const styleBits = uniq([
+    genre,
+    join(d.subgenre),
+    ...(d.genreFusion||[]),
+    ...(d.overallMood||[]),
+    ...(d.primaryEmotion||[]),
+    ...(d.secondaryEmotion||[]),
+    join(d.vocalType),
+    join(d.vocalTone),
+    join(d.deliveryStyle),
+    join(d.tempo),
+    join(d.grooveType),
+    ...(d.mainInstruments||[]),
+    ...(d.secondaryInstruments||[]),
+    join(d.productionPolish),
+    join(d.marketStyle)
+  ]).filter(Boolean).filter(v=>v!=='None');
+  const audience = listOf(d.targetAudience).join(', ');
+  return `Title: ${title}
+Style: ${styleBits.join(', ')}
+Theme focus: ${themes || 'emotionally clear and memorable'}
+Mood: ${mood || 'emotionally layered'}
+Audience: ${audience || 'broad streaming audience'}
+Direction: Keep it vocal-forward, melodic, and lyrical with a strong memorable chorus. Instrumental must stay off.`.trim();
+}
+function buildSongTitle(d){
+  return sanitizePhrase(d.songTitle || d.alternateTitle || `${pickFrom(d.mainTheme||[], 'Midnight')} ${pickFrom(d.subtheme||[], 'Echo')}`);
+}
+function buildHook(d,title){
+  const repeated=sanitizePhrase(d.repeatedPhrase);
+  const must=sanitizePhrase(d.mustUsePhrase);
+  const core=sanitizePhrase(d.coreMessage);
+  const viral=sanitizePhrase(d.viralOneLiner||d.tiktokLine);
+  return repeated || must || viral || core || `This is ${title.toLowerCase()}`;
+}
+function genreFamily(d){
+  const primary=(join(d.genre)||'').toLowerCase();
+  const sub=(join(d.subgenre)||'').toLowerCase();
+  const fusion=(d.genreFusion||[]).join(' ').toLowerCase();
+  const blob=`${primary} ${sub} ${fusion}`;
+  if(/worship|christian|praise/.test(blob)) return 'worship';
+  if(/gospel/.test(blob)) return 'gospel';
+  if(/rap|hip-hop|trap|drill|boom bap/.test(blob)) return 'rap';
+  if(/r&b|neo-soul|soul/.test(blob)) return 'rnb';
+  if(/country|bluegrass/.test(blob)) return 'country';
+  if(/rock|grunge|punk/.test(blob)) return 'rock';
+  if(/pop|dance|disco|k-pop|latin pop|indie pop/.test(blob)) return 'pop';
+  if(/afrobeats|dancehall|reggaeton/.test(blob)) return 'rhythmic';
+  return 'default';
+}
+function getGenreLyricProfile(type,ctx){
+  const profiles={
+    gospel:{
+      pre:["I feel the weight lift every time the heavens open","Mercy found the pieces I was scared to show them"],
+      chorus:[ctx.hook||"Breakthrough on my lips", `Testimony rising, ${ctx.turning}`, `Hands up high, I know ${ctx.resolution}`, ctx.phrase||"He brought me through, that is my song"],
+      verse2:["I walked through fire and still came out singing","Every closed door turned into a reason","What tried to shame me became my witness", `${ctx.character==='I'?'I':ctx.character} keep saying grace is still doing business`],
+      bridge:["Can I get a witness, can I get amen","He kept me covered again and again", ctx.phrase?`Church say it loud, ${ctx.phrase}`:"This is the sound of dry bones living"],
+      outroPrefix:"With testimony:"
+    },
+    worship:{
+      pre:["I lay the noise down when Your presence finds me","What I cannot carry, You keep carrying kindly"],
+      chorus:[ctx.hook||"Here in Your presence", `You are steady through ${ctx.turning}`, `I surrender into ${ctx.resolution}`, ctx.phrase||"Holy, worthy, stay with me"],
+      verse2:["When my faith shakes, Your love stays anchored","When I run dry, Your river answers","Every small prayer still reaches heaven", `${ctx.character==='I'?'I':ctx.character} keep coming back with open hands`],
+      bridge:["Let every room become an altar now","Let every fear lose all its power now", ctx.phrase?`We sing it softly, ${ctx.phrase}`:"Only You can turn my panic into peace"],
+      outroPrefix:"Soft prayer:"
+    },
+    rap:{
+      pre:["Pressure on the neck but I turned it into cadence","Pain taught discipline, now the glow look dangerous"],
+      chorus:[ctx.hook||"I came back different", `Whole lotta growth in the middle of ${ctx.turning}`, `Still ten toes through ${ctx.resolution}`, ctx.phrase||"No cap, I rebuilt the vision"],
+      verse2:["Counted me out, now the room quote facts","Built from the loss, put the truth in the tracks","Talk got cheap so I doubled the action", `${ctx.character==='I'?'I':ctx.character} move like purpose, not random reaction`],
+      bridge:["Look, I got receipts for the nights I survived","Every setback fed the beast inside", ctx.phrase?`Say it plain, ${ctx.phrase}`:"This the turnaround, watch the whole tide flip"],
+      outroPrefix:"Final bar:"
+    },
+    rnb:{
+      pre:["I hear your echo every time the room gets slower","What almost wrecked me only made the feeling closer"],
+      chorus:[ctx.hook||"Touch me like a memory", `Slow burn heart through ${ctx.turning}`, `Silk on skin, moving into ${ctx.resolution}`, ctx.phrase||"No more hiding, read me easy"],
+      verse2:["Midnight gloss on the edge of my healing","Your name fades but I still feel the ceiling","Every deep cut left a sweeter kind of shimmer", `${ctx.character==='I'?'I':ctx.character} keep choosing soft, keep choosing bigger`],
+      bridge:["Pull me close to the truth I denied","Let the velvet dark turn into light", ctx.phrase?`Whisper it once, ${ctx.phrase}`:"This is where desire learns peace"],
+      outroPrefix:"Breath it out:"
+    },
+    country:{
+      pre:["Front porch quiet and the sky still listening","I learned hard truth in the fields of missing"],
+      chorus:[ctx.hook||"Backroad hallelujah", `Dust on my boots through ${ctx.turning}`, `Window down, driving into ${ctx.resolution}`, ctx.phrase||"Small-town heart, still beating big"],
+      verse2:["Tail lights, gravel, and a shirt in the back seat","Mama said pain ain't the same as defeat","County line prayer with the radio glowing", `${ctx.character==='I'?'I':ctx.character} keep moving forward, even slow and knowing`],
+      bridge:["If the moon could talk, it would tell my side","God met me halfway on that midnight drive", ctx.phrase?`Sing it home, ${ctx.phrase}`:"This is where broken roads get holy"],
+      outroPrefix:"From the backroad:"
+    },
+    rock:{
+      pre:["Static in my chest but the drums keep pushing","What tried to crush me only made me louder"],
+      chorus:[ctx.hook||"Let it thunder now", `Fists in the air through ${ctx.turning}`, `Amped-up soul into ${ctx.resolution}`, ctx.phrase||"No more silence, let it hit the rafters"],
+      verse2:["Neon sparks falling off the edge of the speaker","Bad blood gone, now the truth sound meaner","Every cracked note hit harder than a sermon", `${ctx.character==='I'?'I':ctx.character} keep coming alive when the whole room burns in`],
+      bridge:["Turn it up till the doubt can't breathe","Let the feedback cut the chain off me", ctx.phrase?`Shout it raw, ${ctx.phrase}`:"This is the part where the wall gives in"],
+      outroPrefix:"Last scream:"
+    },
+    pop:{
+      pre:["I can feel the lights change when the hook starts landing","What used to hurt me now looks cinematic"],
+      chorus:[ctx.hook||"I came back shining", `Hands in the air through ${ctx.turning}`, `Heart on beat into ${ctx.resolution}`, ctx.phrase||"Say my name like a main-character moment"],
+      verse2:["Mirrorball tears but I still look golden","Big city pulse and a future wide open","Every wrong turn led me into rhythm", `${ctx.character==='I'?'I':ctx.character} keep dancing bigger, no going missing`],
+      bridge:["Drop the lights, let the whole room glow","One more chorus and the crowd will know", ctx.phrase?`Sing it back, ${ctx.phrase}`:"This is the part everybody screams"],
+      outroPrefix:"Fade out with:"
+    },
+    rhythmic:{
+      pre:["Body catch the lesson when the low end hit","Even heavy seasons got a waistline twist"],
+      chorus:[ctx.hook||"Move with the healing", `Sweet bounce through ${ctx.turning}`, `Sun on skin into ${ctx.resolution}`, ctx.phrase||"Turn that pain to motion, keep it rolling"],
+      verse2:["Heat on the curb and the whole crew leaning","Joy in the rhythm, got the hard times leaving","Every small win look bright in the daylight", `${ctx.character==='I'?'I':ctx.character} keep stepping pretty with the bassline`],
+      bridge:["Wave your hand if you made it through the night","Let the drum line bless the other side", ctx.phrase?`Call it once, ${ctx.phrase}`:"This is the joy that survived the pressure"],
+      outroPrefix:"Ride out on:"
+    },
+    default:{
+      pre:["I can feel the shift when I breathe your name out","What almost broke me cannot hold me down now"],
+      chorus:[ctx.hook||ctx.message||"I came back different", `I came back different, ${ctx.turning}`, `Hands to the sky, I am ${ctx.resolution}`, ctx.phrase||"No more small living, no more hiding anymore"],
+      verse2:[`${ctx.audience||'They'} watched me bend but never saw me fold`,"Even my scars got a new kind of glow","What I thought was the end was a door", `${ctx.character==='I'?'I':ctx.character} keep choosing love, keep choosing more`],
+      bridge:["If you hear my voice, let it pull you through","Grace met the wreckage and made it new", ctx.phrase?`Say it with me now, ${ctx.phrase}`:"This is the part where the dark lets go"],
+      outroPrefix:""
+    }
+  };
+  return profiles[type]||profiles.default;
+}
+function buildDynamicSectionLine(kind,d,genreType,ctx,index){
+  const theme=(listOf(d.mainTheme)[0]||'healing').toLowerCase();
+  const subtheme=(listOf(d.subtheme)[0]||'growth').toLowerCase();
+  const mood=(listOf(d.overallMood)[0]||'soulful').toLowerCase();
+  const emotion=(listOf(d.primaryEmotion)[0]||listOf(d.secondaryEmotion)[0]||'hope').toLowerCase();
+  const audience=sanitizePhrase(Array.isArray(d.targetAudience)?d.targetAudience[0]:d.targetAudience||'anybody who needs it');
+  const setting=sanitizePhrase(d.storySetting || (d.atmosphere&&d.atmosphere[0]) || d.timeOfDay || 'late night');
+  const dedication=sanitizePhrase(d.personalDedication || '');
+  const title=ctx.title;
+  const turning=ctx.turning;
+  const resolution=ctx.resolution;
+  const message=ctx.message;
+  const phrase=ctx.phrase;
+  const family=(genreType||'default').toLowerCase();
+
+  const introsByGenre={
+    gospel:[
+      `Let this be for every soul still standing on ${theme}.`,
+      `Church doors open wide, this one starts in ${setting}.`,
+      `A testimony from ${theme} into ${resolution}.`
+    ],
+    worship:[
+      `Breathe deep, this begins where ${theme} meets grace.`,
+      `A quiet offering from ${setting} into ${resolution}.`,
+      `For the hearts still trusting God through ${turning}.`
+    ],
+    rap:[
+      `Yeah, this the run-up from ${theme} into ${resolution}.`,
+      `From ${setting} to the spotlight, no fake flex in this one.`,
+      `For the ones turning pressure into purpose.`
+    ],
+    rnb:[
+      `Soft lights on, let this start in ${setting}.`,
+      `A velvet confession about ${theme} and ${resolution}.`,
+      `For the hearts still learning how to feel without folding.`
+    ],
+    country:[
+      `Pull up a little closer, this starts out in ${setting}.`,
+      `A backroad story about ${theme}, grit, and ${resolution}.`,
+      `For anybody riding through change with both hands on the wheel.`
+    ],
+    rock:[
+      `Turn it up, this starts right in the middle of ${theme}.`,
+      `Static in the room, truth in the mic, ${setting} in the bones.`,
+      `For the ones breaking through the noise into ${resolution}.`
+    ],
+    pop:[
+      `Cue the lights, this opens on ${theme} with main-character energy.`,
+      `A glossy little confession from ${setting} into ${resolution}.`,
+      `For anybody ready to feel seen, loud, and alive tonight.`
+    ],
+    rhythmic:[
+      `Feel the bounce first, the message comes with the rhythm.`,
+      `From ${setting} into daylight, this one moves with ${resolution}.`,
+      `For anyone turning heavy nights into lighter steps.`
+    ],
+    default:[
+      `This starts in ${setting}, somewhere between ${theme} and ${resolution}.`,
+      `A small confession with a big heartbeat.`,
+      `For ${audience}, and anybody else who needed these words.`
+    ]
+  };
+
+  const outrosByTheme={
+    heartbreak:[
+      `For anybody healing after heartbreak and finally choosing themselves.`,
+      `Leave this here for the ones learning that goodbye can be holy too.`,
+      `Dedicated to the hearts that cracked open and still kept loving.`
+    ],
+    healing:[
+      `For anybody rebuilding softly and still calling that strength.`,
+      `Leave a little room for healing to happen slower than pride wants it to.`,
+      `Dedicated to the ones becoming whole in private.`
+    ],
+    faith:[
+      `For every soul still trusting God in the middle of unfinished prayers.`,
+      `Leave this with the people who kept the faith when the room got quiet.`,
+      `Dedicated to grace that kept showing up on time.`
+    ],
+    prayer:[
+      `For the ones still whispering prayers they haven't seen answered yet.`,
+      `Leave this right here like a prayer with a beat under it.`,
+      `Dedicated to anybody learning that surrender is not defeat.`
+    ],
+    confidence:[
+      `For the ones done shrinking to make weak people comfortable.`,
+      `Leave this with anybody walking taller after the mess.`,
+      `Dedicated to the glow-up that came from grit, not permission.`
+    ],
+    victory:[
+      `For the ones who survived the chapter people thought would end them.`,
+      `Leave this as proof that the comeback had hands and feet.`,
+      `Dedicated to everybody stepping into the win with scars showing.`
+    ],
+    love:[
+      `For the hearts learning that safe love can still feel electric.`,
+      `Leave this with anybody who wants love to feel steady and true.`,
+      `Dedicated to the people choosing depth over drama.`
+    ],
+    "self-love":[
+      `For the ones finally becoming home to themselves.`,
+      `Leave this with anybody learning that softness and standards can live together.`,
+      `Dedicated to the glow that came after choosing yourself.`
+    ],
+    motivation:[
+      `For the ones grinding in silence till the room catches up.`,
+      `Leave this with anybody building a future from sheer discipline.`,
+      `Dedicated to everybody still moving even when nobody clapped yet.`
+    ],
+    transformation:[
+      `For the ones who came out changed and refused to apologize for it.`,
+      `Leave this with anybody becoming unrecognizable in the best way.`,
+      `Dedicated to the version of you that kept going.`
+    ],
+    default:[
+      `For ${audience}, and anybody else who needed a way through ${theme}.`,
+      `Leave this with the ones still finding their way into ${resolution}.`,
+      `Dedicated to anybody making peace with ${theme} and walking forward anyway.`
+    ]
+  };
+
+  const intros=introsByGenre[family]||introsByGenre.default;
+  const themeBank=outrosByTheme[theme]||outrosByTheme.default;
+  const moodAddonMap={
+    prayerful:` Keep it prayerful and open-hearted.`,
+    triumphant:` Let it land like a win.`,
+    sensual:` Let it leave a little heat in the air.`,
+    nostalgic:` Let the last note feel like memory.`,
+    uplifting:` Let the ending lift the room.`,
+    reflective:` Let it sit with people for a minute.`,
+    dark:` Let the shadows stay honest on the way out.`
+  };
+  const emotionAddonMap={
+    joy:` Smile when this fades out.`,
+    confidence:` Walk off bold after this one.`,
+    hope:` Carry some hope out with you.`,
+    peace:` Let the peace linger.`,
+    heartbreak:` Let the ache tell the truth.`,
+    desire:` Let it end slow and close.`,
+    determination:` Keep your chin up when this ends.`
+  };
+
+  if(kind==='intro'){
+    const base=intros[index % intros.length];
+    const extra=phrase ? ` Key line: ${phrase}.` : '';
+    return `${base}${extra}`.trim();
+  }
+
+  let base = dedication || themeBank[index % themeBank.length];
+  const moodAddon=moodAddonMap[mood]||'';
+  const emotionAddon=emotionAddonMap[emotion]||'';
+  const genreTagMap={
+    gospel:' Testify on the way out.',
+    worship:' Stay reverent on the fade.',
+    rap:' Let the last word hit like a statement.',
+    rnb:' Leave it silky but honest.',
+    country:' Let it ride off like a story.',
+    rock:' Let it ring after the last chord.',
+    pop:' Let it sparkle all the way down.',
+    rhythmic:' Let the groove carry the message home.',
+    default:''
+  };
+  const genreAddon=genreTagMap[family]||'';
+  if(message && !dedication && index===1) base += ` ${message}.`;
+  return `${base}${moodAddon}${emotionAddon}${genreAddon}`.trim();
+}
+
+function buildLyrics(d){
+  const title = buildSongTitle(d);
+  const hook = buildHook(d,title);
+  const themes = listOf(d.mainTheme,'healing');
+  const moods = listOf(d.overallMood,'soulful');
+  const emotions = uniq([...(d.primaryEmotion||[]), ...(d.secondaryEmotion||[])]);
+  const setting = sanitizePhrase(d.storySetting || (d.atmosphere&&d.atmosphere[0]) || d.timeOfDay || 'late night');
+  const conflict = sanitizePhrase(d.conflict || 'holding on too long');
+  const turning = sanitizePhrase(d.turningPoint || d.resolution || 'finally letting go');
+  const resolution = sanitizePhrase(d.resolution || d.endingTone || 'walking into peace');
+  const message = sanitizePhrase(d.coreMessage || d.lessonTakeaway || 'I choose peace over chaos');
+  const phrase = sanitizePhrase(d.mustUsePhrase);
+  const audience = sanitizePhrase(Array.isArray(d.targetAudience)?d.targetAudience[0]:d.targetAudience);
+  const character = sanitizePhrase(d.characterName || d.characterRole || 'I');
+  const genreType = genreFamily(d);
+  const profile = getGenreLyricProfile(genreType,{hook,turning,resolution,phrase,character,audience,message});
+  const ctx = {title,turning,resolution,message,phrase};
+  const intro1 = buildDynamicSectionLine('intro',d,genreType,ctx,0);
+  const intro2 = buildDynamicSectionLine('intro',d,genreType,ctx,1);
+  const outro1 = buildDynamicSectionLine('outro',d,genreType,ctx,0);
+  const outro2 = buildDynamicSectionLine('outro',d,genreType,ctx,1);
+  const line1 = lineFromParts([`In the`, setting + ',', `I kept`, themes[0] || 'hope', `under my tongue`], 'In the late night, I kept my hope under my tongue');
+  const line2 = lineFromParts([`Heart full of`, emotions[0] || moods[0], `but I wore it like gold`], 'Heart full of fire but I wore it like gold');
+  const line3 = lineFromParts([`I was stuck in`, conflict], 'I was stuck in the same old hurt');
+  const line4 = lineFromParts([`Now every step says`, message], 'Now every step says I choose peace over chaos');
+  const pre1 = profile.pre[0];
+  const pre2 = profile.pre[1];
+  const c1 = profile.chorus[0];
+  const c2 = profile.chorus[1];
+  const c3 = profile.chorus[2];
+  const c4 = profile.chorus[3];
+  const v21 = profile.verse2[0];
+  const v22 = profile.verse2[1];
+  const v23 = profile.verse2[2];
+  const v24 = profile.verse2[3];
+  const bridge1 = profile.bridge[0];
+  const bridge2 = profile.bridge[1];
+  const bridge3 = profile.bridge[2];
+  return `[Intro]
+${intro1}
+${intro2}
+
+[Verse 1]
+${line1}
+${line2}
+${line3}
+${line4}
+
+[Pre-Chorus]
+${pre1}
+${pre2}
+
+[Chorus]
+${c1}
+${c2}
+${c3}
+${c4}
+
+[Verse 2]
+${v21}
+${v22}
+${v23}
+${v24}
+
+[Bridge]
+${bridge1}
+${bridge2}
+${bridge3}
+
+[Chorus]
+${c1}
+${c2}
+${c3}
+${c4}
+
+[Outro]
+${outro1}
+${outro2}`;
+}
+function buildSunoPaste(title,style,lyrics){
+  return `SUNO CUSTOM MODE
+
+TITLE
+${title}
+
+STYLE
+${style}
+
+LYRICS
+${lyrics}
+
+CHECK BEFORE GENERATING
+- Paste the title into Suno title field if available
+- Paste STYLE into song description or style field
+- Paste LYRICS into the lyrics field
+- Make sure Instrumental is OFF`;
+}
+function generateOutputs(){const d=allData();const title=d.songTitle||'Untitled Song Idea';const genre=[join(d.genre),...(d.genreFusion||[])].filter(Boolean).join(' + ');const themes=(d.mainTheme||[]).join(', ');const mood=[...(d.overallMood||[]),...(d.primaryEmotion||[]),...(d.secondaryEmotion||[])].join(', ');const customLyrics=(d.customFullLyrics||'').trim();const lyricText=customLyrics||buildLyrics(d);const blocks=APP.sections.map(s=>{const lines=linesForSection(d,s);return lines.length?`## ${s.title}
+${lines.map(x=>'- '+x).join('\n')}`:'';}).filter(Boolean).join('\n\n');
+state.outputs.lyrics={
+ basic:`Create lyrics for a song called "${title}" in the ${join(d.genre)||'selected'} lane. Center it on ${themes||'strong themes'} with a ${join(d.chorusStyle)||'memorable chorus'} and a mood that feels ${mood||'emotionally layered'}.`,
+ detailed:`Write a complete original song lyric draft for "${title}".
+
+Genre blend: ${genre||'Open'}
+Themes: ${themes||'Open'}
+Core message: ${join(d.coreMessage)||'Open'}
+Mood: ${mood||'Open'}
+Lyric style: ${join(d.lyricStyle)||'Open'}
+Rhyme / flow: ${join(d.rhymeStyle)||'Open'} / ${join(d.flowStyle)||'Open'}
+Structure: Intro ${join(d.intro)||'Open'}, ${join(d.verseCount)||'2'} verses, chorus ${join(d.chorusStyle)||'Open'}, bridge ${join(d.bridge)||'Open'}, outro ${join(d.outro)||'Open'}
+Story setting: ${join(d.storySetting)||'Open'}
+Conflict: ${join(d.conflict)||'Open'}
+Resolution: ${join(d.resolution)||'Open'}
+Must-use phrase: ${join(d.mustUsePhrase)||'None'}
+Must-avoid phrase: ${join(d.mustAvoidPhrase)||'None'}`,
+ advanced:`You are writing an original song lyric concept and draft.
+
+Build the response in this order:
+1. Song premise
+2. Section-by-section lyric outline
+3. Hook options
+4. Sample chorus
+5. Full lyric draft
+6. Alternate title ideas
+7. Viral caption lines
+
+Use these constraints:
+${blocks}
+
+Keep the lyrics original, emotionally specific, memorable, and commercially useful.`
+};
+state.outputs.concept={
+ basic:`Create a song concept for "${title}" with the genre blend "${genre||'Open'}", centered on "${themes||'Open'}", aimed at ${join(d.targetAudience)||'a broad audience'}.`,
+ detailed:`Develop a song concept for "${title}".
+
+Genre blend: ${genre||'Open'}
+Market position: ${join(d.marketStyle)||'Open'}
+Themes: ${themes||'Open'}
+Mood: ${mood||'Open'}
+Story world: ${join(d.storySetting)||'Open'} / ${join(d.timeOfDay)||'Open'} / ${join(d.season)||'Open'}
+Character role: ${join(d.characterRole)||'Open'}
+Conflict and turn: ${join(d.conflict)||'Open'} -> ${join(d.turningPoint)||'Open'}
+Ending tone: ${join(d.endingTone)||'Open'}
+Production feel: ${join(d.productionPolish)||'Open'}, ${join(d.minimalLayered)||'Open'}, ${join(d.analogDigital)||'Open'}
+Visual brand: ${join(d.albumCoverVibe)||'Open'}, ${join(d.colorPalette)||'Open'}, ${join(d.musicVideoConcept)||'Open'}
+Commercial path: ${join(d.intendedUse)||'Open'}
+Viral line target: ${join(d.tiktokLine)||join(d.viralOneLiner)||'Open'}
+
+Return a one-paragraph concept, title alternatives, structure outline, hook ideas, visual branding summary, and why listeners would connect.`,
+ advanced:`Act as a songwriter, A&R strategist, and creative director.
+
+Create a full song concept package with a logline, emotional arc, audience fit, chorus concept, production concept, visual branding direction, short-form clip idea, sync/commercial angle, 3 alternate titles, and 5 hook ideas.
+
+Use these hard inputs:
+${blocks}`
+};
+state.outputs.suno={
+ basic: title,
+ detailed: buildStylePrompt(d,title,genre,mood,themes),
+ advanced: lyricText,
+ paste: buildSunoPaste(title, buildStylePrompt(d,title,genre,mood,themes), lyricText)
+};
+makeTabs();}
+function safeGenerate(scroll=true){
+  try{
+    generateOutputs();
+    makeTabs();
+    if(scroll)document.querySelector('#outputSection').scrollIntoView({behavior:'smooth'});
+    note('Output generated.');
+  }catch(err){
+    console.error(err);
+    note('Generate Output hit a snag, but the button is patched now. Try again.');
+  }
+}
+function makeTabs(){const tabs=$('#tabs');const panels=$('#panels');const data=state.outputs[state.mode]||{};const arr=state.mode==='suno' ? [['basic','Song Title'],['detailed','Style Prompt'],['advanced','Full Lyrics'],['paste','Suno Paste Block']] : [['basic','Basic Version'],['detailed','Detailed Version'],['advanced','Advanced Prompt Version']];tabs.innerHTML=arr.map((a,i)=>`<button class="btn tab ${i===0?'active':''}" data-tab="${a[0]}">${a[1]}</button>`).join('');panels.innerHTML=arr.map((a,i)=>`<div class="panel" data-panel="${a[0]}" style="display:${i===0?'block':'none'}"><div class="output" id="out-${a[0]}">${esc(data[a[0]]||'')}</div></div>`).join('');$$('[data-tab]',tabs).forEach(b=>b.onclick=()=>{$$('[data-tab]',tabs).forEach(x=>x.classList.toggle('active',x===b));$$('[data-panel]',panels).forEach(p=>p.style.display=p.dataset.panel===b.dataset.tab?'block':'none');});}
+function activeOutput(){const b=$('#tabs .active');return b?($('#out-'+b.dataset.tab)?.textContent||''):'';}
+async function copyOutput(){const t=activeOutput();if(!t.trim())return note('Nothing to copy yet.');await navigator.clipboard.writeText(t);note('Output copied.');}
+async function copyAdvanced(){generateOutputs();makeTabs();const payload=state.mode==='suno'?((state.outputs[state.mode]||{}).paste||''):((state.outputs[state.mode]||{}).advanced||'');await navigator.clipboard.writeText(payload);note(state.mode==='suno'?'Suno paste block copied.':'Advanced prompt copied.');}
+function downloadTxt(){const t=activeOutput();if(!t.trim())return note('Generate something first.');const blob=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((getVal('songTitle')||'song-generator-output').replace(/[^a-z0-9]+/gi,'-').toLowerCase())+'-'+state.mode+'.txt';a.click();URL.revokeObjectURL(a.href);note('TXT downloaded.');}
+function exportJson(){const payload={mode:state.mode,values:allData()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='song-generator-settings.json';a.click();URL.revokeObjectURL(a.href);note('JSON exported.');}
+function importJson(file){const fr=new FileReader();fr.onload=()=>{try{const p=JSON.parse(fr.result);if(p.mode)state.mode=p.mode;Object.entries(p.values||{}).forEach(([k,v])=>setVal(k,v));makeModes();syncTags();syncRanges();updateProgress();note('JSON imported.');}catch(e){note('That JSON file is busted.');}};fr.readAsText(file);}
+function expand(open){$$('#form details').forEach(d=>d.open=open);}
+function init(){makeModes();makePresets();makeStarter();makePrompts();buildForm();makeTabs();
+$('#searchPrompt').oninput=e=>makePrompts(e.target.value);
+$('#themeBtn').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('songTheme',document.body.classList.contains('light')?'light':'dark');};
+if(localStorage.getItem('songTheme')==='light')document.body.classList.add('light');
+$('#savePreset').onclick=savePreset;
+$('#quickStart').onclick=()=>{loadPreset(APP.presets[0]);state.mode='lyrics';makeModes();generateOutputs();makeTabs();document.querySelector('#outputSection').scrollIntoView({behavior:'smooth'});};
+$('#customBuilder').onclick=()=>document.querySelector('#form').scrollIntoView({behavior:'smooth'});
+$('#randomHeader').onclick=randomAll; $('#randomTop').onclick=randomAll; $('#randomAll').onclick=randomAll; $('#clearAll').onclick=clearAll;
+$('#generate').onclick=()=>safeGenerate(true);
+$('#copyAdvanced').onclick=copyAdvanced; $('#copyOut').onclick=copyOutput; $('#downloadTxt').onclick=downloadTxt; $('#clearOut').onclick=()=>{state.outputs={lyrics:{},concept:{},suno:{}};makeTabs();note('Output cleared.');};
+$('#exportJson').onclick=exportJson; $('#importJson').onchange=e=>{const f=e.target.files[0]; if(f)importJson(f); e.target.value='';};
+$('#expandAll').onclick=()=>expand(true); $('#collapseAll').onclick=()=>expand(false);
+$('#viewOut').onclick=()=>document.querySelector('#outputSection').scrollIntoView({behavior:'smooth'});
+$('#jumpToBuilder').onclick=()=>document.querySelector('#form').scrollIntoView({behavior:'smooth'});
+$('#toOutput').onclick=()=>document.querySelector('#outputSection').scrollIntoView({behavior:'smooth'});
+$('#homeTop').onclick=()=>document.querySelector('#topPage').scrollIntoView({behavior:'smooth'});
+$('#homeBottom').onclick=()=>document.querySelector('#topPage').scrollIntoView({behavior:'smooth'});
+safeGenerate(false);
+}
+init();
+</script>
+</body>
+</html>
